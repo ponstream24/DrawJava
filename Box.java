@@ -50,7 +50,7 @@ public class Box extends Figure {
 			else if( w < 0 && h >= 0 ) {
 				g.fillRect(x + w, y, -w, h);
 			}
-			else if( w >= 0 && h < 0 ) {
+			else if(w >= 0) {
 				g.fillRect(x, y + h, w, -h);
 			}
 			else  {

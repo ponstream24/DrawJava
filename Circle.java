@@ -47,7 +47,7 @@ public class Circle extends Figure {
 			else if( w < 0 && h >= 0 ) {
 				g.fillOval(x + w, y, -w, h);
 			}
-			else if( w >= 0 && h < 0 ) {
+			else if(w >= 0) {
 				g.fillOval(x, y + h, w, -h);
 			}
 			else  {

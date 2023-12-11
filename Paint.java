@@ -12,6 +12,8 @@
 
 package enshuReport2_2023;
 
+import enshuReport2_2023.util.HistoryCtrl;
+
 import javax.swing.*;
 
 import static enshuReport2_2023.util.ColorCtrl.*;
@@ -25,17 +27,7 @@ import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
-import java.awt.event.MouseWheelEvent;
-import java.awt.event.MouseWheelListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.event.*;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -58,6 +50,8 @@ public class Paint extends Frame
 	Figure c; // 点
 	LinkedList<Figure> coords = new LinkedList<>();// 線分
 	ArrayList<LinkedList<Figure>> coordsList = new ArrayList<LinkedList<Figure>>(); //　線分リスト
+
+	HistoryCtrl historyCtrl = new HistoryCtrl();
 
 	CheckboxGroup cbg;
 	Checkbox c1, c2, c3, c4;
@@ -142,9 +136,15 @@ public class Paint extends Frame
 
 		end.addActionListener(this);
 		colorSelect.addActionListener(this);
+		undo.addActionListener(this);
+		redo.addActionListener(this);
 
 		end.addKeyListener(this);
+		undo.addKeyListener(this);
+		redo.addKeyListener(this);
 		colorSelect.addKeyListener(this);
+
+		historyCtrl.add(coordsList);
 	}
 
 	/**
@@ -176,6 +176,8 @@ public class Paint extends Frame
 
 	@Override
 	public void paint(Graphics g) {
+
+		updateHistoryButton();
 
 		//		2Dにキャスト
 		Graphics2D g2 = (Graphics2D) g;
@@ -380,6 +382,7 @@ public class Paint extends Frame
 
 			//			線分リストに線分を追加
 			coordsList.add(coords);
+			historyCtrl.add(coordsList);
 		}
 		
 		
@@ -648,6 +651,7 @@ public class Paint extends Frame
 
 		//		線分を線分リストに追加
 		coordsList.add(coords);
+		historyCtrl.add(coordsList);
 
 		//		線分を初期化
 		coords = new LinkedList<>();
@@ -697,6 +701,7 @@ public class Paint extends Frame
 
 		//		線分を線分リストに追加
 		coordsList.add(coords);
+		historyCtrl.add(coordsList);
 
 		//		線分を初期化
 		coords = new LinkedList<>();
@@ -720,6 +725,7 @@ public class Paint extends Frame
 
 			//		線分を線分リストに追加
 			coordsList.add(coords);
+			historyCtrl.add(coordsList);
 
 			//		線分を初期化
 			coords = new LinkedList<>();
@@ -737,15 +743,77 @@ public class Paint extends Frame
 
 		else if( e.getActionCommand().equalsIgnoreCase("Undo") ){
 
+			if( historyCtrl.getNextUndo() == null ){
+				System.out.println(historyCtrl.getUndoList());
+				System.out.println("Undo 限界");
+				return;
+			}
+
+			if( coordsList.size() == historyCtrl.getUndoList().size() ){
+				historyCtrl.undo();
+			}
+
+			System.out.println(historyCtrl.getUndoList());
+			System.out.println("復元 : " + coordsList.size() + " -> " + historyCtrl.getUndoList().size());
+
+			ArrayList<LinkedList<Figure>> _list = historyCtrl.undo();
+
+			System.out.println("Undo : "+(historyCtrl.getUndoList().size()+1 )+"->"+historyCtrl.getUndoList().size());
+
+			System.out.println(_list);
+			if( _list == null ) return;
+
+			System.out.println("Undo更新");
+
+			coordsList = _list;
+
+			//		オフスクリーンをリセット
+			offScreenImage = null;
+
+			//		再描画をリクエスト
+			repaint();
 		}
 		else if( e.getActionCommand().equalsIgnoreCase("Redo") ){
 
+			if( historyCtrl.getNextRedo() == null ){
+
+				System.out.println(historyCtrl.getRedoList());
+				System.out.println("Redo 限界");
+				return;
+			}
+
+			System.out.println(historyCtrl.getRedoList());
+//			if( historyCtrl.getNextRedo() == coordsList ){
+//				historyCtrl.redo();
+//			}
+
+			if( coordsList.size() == historyCtrl.getRedoList().size() ){
+				historyCtrl.redo();
+			}
+
+			ArrayList<LinkedList<Figure>> _list = historyCtrl.redo();
+			System.out.println("Redo : "+(historyCtrl.getRedoList().size()+1) +"->"+historyCtrl.getRedoList().size());
+
+			System.out.println(_list);
+			if( _list == null ) return;
+
+			System.out.println("Redo更新");
+
+			coordsList = _list;
+
+			//		オフスクリーンをリセット
+			offScreenImage = null;
+
+			//		再描画をリクエスト
+			repaint();
 		}
 		else{
 
 			save("paint.dat");
 			System.exit(0);
 		}
+
+		updateHistoryButton();
 	}
 
 	public void save(String fname) {
@@ -772,5 +840,14 @@ public class Paint extends Frame
 		}
 
 		repaint();
+	}
+
+	public void updateHistoryButton(){
+
+		if( historyCtrl.getNextUndo() == null ) undo.setEnabled(false);
+		else undo.setEnabled(true);
+
+		if( historyCtrl.getNextRedo() == null ) redo.setEnabled(false);
+		else redo.setEnabled(true);
 	}
 }

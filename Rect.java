@@ -31,7 +31,7 @@ public class Rect extends Figure {
 		else if( w < 0 && h >= 0 ) {
 			g.drawRect(x + w, y, -w, h);
 		}
-		else if( w >= 0 && h < 0 ) {
+		else if(w >= 0) {
 			g.drawRect(x, y + h, w, -h);
 		}
 		else  {
