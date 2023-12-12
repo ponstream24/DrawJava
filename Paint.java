@@ -19,6 +19,8 @@ import javax.swing.*;
 import static enshuReport2_2023.util.ColorCtrl.*;
 import static enshuReport2_2023.util.FileCtrl.fileLoad;
 import static enshuReport2_2023.util.FileCtrl.fileSave;
+import static enshuReport2_2023.util.ShowCtrl.setDesign;
+import static enshuReport2_2023.util.ShowCtrl.showError;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -30,27 +32,30 @@ import java.util.LinkedList;
 // KeyListener -> キー監視
 // MouseWheelListener -> マウスホイール監視
 public class Paint extends Frame
-		implements MouseListener, MouseMotionListener, KeyListener, MouseWheelListener, ActionListener {
+		implements MouseListener, MouseMotionListener, KeyListener, MouseWheelListener, ActionListener, ItemListener {
 
 	//	初期化
 	public static Frame mainFrame;
 	public static String loadingFile = null;
 	public int x, y;
-	public boolean isUndoRedoLastTime = false;
+	public static boolean isUndoRedoLastTime = false;
 	public boolean isFill = false;
-	public boolean isSaved = true;
+	public static boolean isDrawLock = false;
+	public static boolean isSaved = true;
 	public Color color = Color.BLACK; // 色
+	public Color customColor = Color.BLACK; // 色
 	public int size = 1; // 太さ
-	public Figure c; // 点
-	public LinkedList<Figure> coords = new LinkedList<>();// 線分
+	public static Figure c; // 点
+	public static LinkedList<Figure> coords = new LinkedList<>();// 線分
 	public static ArrayList<LinkedList<Figure>> coordsList = new ArrayList<>(); //　線分リスト
 
-	public HistoryCtrl historyCtrl = new HistoryCtrl();
+	public static HistoryCtrl historyCtrl = new HistoryCtrl();
 
-	public CheckboxGroup cbg;
-	public ArrayList<Checkbox> cgCheckBoxList = new ArrayList<>();
-	public ArrayList<Button> buttonList = new ArrayList<>();
-	public ArrayList<Component> otherList = new ArrayList<>();
+	public static CheckboxGroup cbg, colorGroup;
+	public static ArrayList<Checkbox> cgCheckBoxList = new ArrayList<>();
+	public static ArrayList<Button> buttonList = new ArrayList<>();
+	public static ArrayList<Component> otherList = new ArrayList<>();
+	public static ArrayList<Checkbox> colorList = new ArrayList<>();
 
 	/**
 	 *  0:通常描画
@@ -66,7 +71,6 @@ public class Paint extends Frame
 
 		//		インスタンス
 		Paint f = new Paint();
-		Paint.mainFrame = f;
 		f.setTitle("2232103");
 		f.setVisible(true);
 		if (args.length >= 1)
@@ -75,9 +79,13 @@ public class Paint extends Frame
 
 	//	コンストラクター
 	public Paint() {
+
+		mainFrame = this;
+
 		c = null;
 
 		this.setSize(640, 480);
+		this.setBackground(Color.WHITE);
 
 		//		各イベント監視開始
 		this.addMouseListener(this);
@@ -124,6 +132,7 @@ public class Paint extends Frame
 			checkbox = new Checkbox(otherLabel);
 			add(checkbox);
 			checkbox.addKeyListener(this);
+			checkbox.addItemListener(this);
 			otherList.add(checkbox);
 		}
 
@@ -131,14 +140,28 @@ public class Paint extends Frame
 
 		String[] buttonLabels = {"色を選択", "Undo", "Redo", "終了"};
 
-		for (int i = 0; i < buttonLabels.length; i++) {
-			Button b = new Button(buttonLabels[i]);
-			b.setBounds(560, 300 + i *30, 120, 30);
+		for (String buttonLabel : buttonLabels) {
+			Button b = new Button(buttonLabel);
 			add(b);
 			b.addActionListener(this);
 			b.addKeyListener(this);
 			buttonList.add(b);
 		}
+
+		colorGroup = new CheckboxGroup();
+
+		String[] colorLabels = {"黒", "赤", "青", "シアン", "ピンク", "灰色", "緑", "黄", "マゼンタ", "オレンジ", "カスタム"};
+
+		for (String label : colorLabels) {
+			Checkbox checkbox;
+			checkbox = new Checkbox(label, colorGroup, false);
+			add(checkbox);
+			checkbox.addKeyListener(this);
+			checkbox.addItemListener(this);
+			colorList.add(checkbox);
+		}
+
+		colorList.get(0).setState(true);
 
 		setDesign();
 
@@ -282,7 +305,7 @@ public class Paint extends Frame
 		info.add("5 : ピンク");
 		info.add("6 : 灰色");
 		info.add("7 : 緑");
-		info.add("8 : 黄色");
+		info.add("8 : 黄");
 		info.add("9 : マゼンタ");
 		info.add("0 : オレンジ");
 
@@ -300,6 +323,8 @@ public class Paint extends Frame
 
 	@Override
 	public void mousePressed(MouseEvent e) {
+
+		if( isDrawLock ) return;
 
 		if(otherList.get(0) instanceof Checkbox isFillCheckbox){
 
@@ -360,6 +385,8 @@ public class Paint extends Frame
 	@Override
 	public void mouseReleased(MouseEvent e) {
 
+		if( isDrawLock ) return;
+
 		if (mode != 2 && c != null) {
 
 			//			点を深層クローン
@@ -413,6 +440,8 @@ public class Paint extends Frame
 
 	@Override
 	public void mouseDragged(MouseEvent e) {
+
+		if( isDrawLock ) return;
 
 		// 全体移動用なら
 		if (mode == 2) {
@@ -493,6 +522,8 @@ public class Paint extends Frame
 
 	@Override
 	public void mouseMoved(MouseEvent e) {
+
+		if( isDrawLock ) return;
 
 		// 全体移動用なら
 		if (mode == 2) {
@@ -609,6 +640,8 @@ public class Paint extends Frame
 		else if (key == '9') color = Color.MAGENTA;
 		else if (key == '0') color = Color.ORANGE;
 		else if (key == 'r' || key == 'R') {
+
+			if( isDrawLock ) return;
 			coordsList = new ArrayList<>();
 			coords = new LinkedList<>();
 			historyAdd();
@@ -725,7 +758,8 @@ public class Paint extends Frame
 
 		if( e.getActionCommand().equalsIgnoreCase("色を選択") ){
 
-			this.color = JColorChooser.showDialog(this, "色の選択", Color.white);
+			this.color = JColorChooser.showDialog(this, "色の選択", Color.BLACK);
+			this.customColor = this.color;
 
 			if( this.color == null  ) this.color = Color.BLACK;
 
@@ -885,73 +919,41 @@ public class Paint extends Frame
 		}
 	}
 
-	private void setDesign(){
 
-		int margin_top = 50;
-		int margin_right = 20;
-		int interval = 10;
 
-//		画面のサイズ
-		double widthMax = this.getSize().getWidth();
-		double heightMax = this.getSize().getHeight();
+	@Override
+	public void itemStateChanged(ItemEvent e) {
 
-//		現在の位置
-		double _w = widthMax - margin_right;
-		double _h = margin_top;
+		if( e.getItemSelectable() instanceof Checkbox checkbox ){
 
-//		checkボックス設定
-		double checkbox_w = 80;
-		double checkbox_h = 30;
+//			色選択ボックス
+			if(colorList.contains(checkbox)){
 
-		for ( Checkbox checkbox : cgCheckBoxList ){
+//				false
+				if( !checkbox.getState() ) return;
 
-			int x = (int) (_w - checkbox_w);
-			int y = (int) _h ;
-			int w = (int) checkbox_w;
-			int h = (int) checkbox_h;
+				int index = colorList.indexOf(checkbox);
 
-			checkbox.setBounds(x, y, w, h);
+				if (index == 0) this.color = Color.BLACK;
+				else if (index == 1) this.color = Color.RED;
+				else if (index == 2) this.color = Color.BLUE;
+				else if (index == 3) this.color = Color.CYAN;
+				else if (index == 4) this.color = Color.PINK;
+				else if (index == 5) this.color = Color.GRAY;
+				else if (index == 6) this.color = Color.GREEN;
+				else if (index == 7) this.color = Color.YELLOW;
+				else if (index == 8) this.color = Color.MAGENTA;
+				else if (index == 9) this.color = Color.ORANGE;
+				else if (index == 10) this.color = customColor;
 
-//			更新
-			_h += checkbox_h + interval;
-		}
+				else showError();
+			}
 
-//		間隔
-		_h += 20;
+//			描画ロック
+			else if( otherList.get(1) == checkbox ){
 
-		checkbox_w = 100;
-
-		for ( Component component : otherList ){
-
-			int x = (int) (_w - checkbox_w);
-			int y = (int) _h ;
-			int w = (int) checkbox_w;
-			int h = (int) checkbox_h;
-
-			component.setBounds(x, y, w, h);
-
-//			更新
-			_h += checkbox_h + interval;
-		}
-
-//		間隔
-		_h += 20;
-
-//		ボタン設定
-		double button_w = 120;
-		double button_h = 30;
-
-		for ( Button button : buttonList ){
-
-			int x = (int) (_w - button_w);
-			int y = (int) _h ;
-			int w = (int) button_w;
-			int h = (int) button_h;
-
-			button.setBounds(x, y, w, h);
-
-//			更新
-			_h += checkbox_h + interval;
+				isDrawLock = checkbox.getState();
+			}
 		}
 	}
 }
