@@ -138,7 +138,7 @@ public class Paint extends Frame
 
 		cgCheckBoxList.get(0).setState(true);
 
-		String[] buttonLabels = {"色を選択", "Undo", "Redo", "終了"};
+		String[] buttonLabels = {"色を選択", "Undo", "Redo", "読み込み", "上書き保存", "新規保存","終了"};
 
 		for (String buttonLabel : buttonLabels) {
 			Button b = new Button(buttonLabel);
@@ -301,13 +301,13 @@ public class Paint extends Frame
 		info.add("1 : 黒");
 		info.add("2 : 赤");
 		info.add("3 : 青");
-		info.add("4 : シアン");
-		info.add("5 : ピンク");
-		info.add("6 : 灰色");
+		info.add("4 : 水");
+		info.add("5 : 薄桃");
+		info.add("6 : 灰");
 		info.add("7 : 緑");
 		info.add("8 : 黄");
-		info.add("9 : マゼンタ");
-		info.add("0 : オレンジ");
+		info.add("9 : 桃");
+		info.add("0 : 橙");
 
 		//		文字色は黒
 		g.setColor(Color.BLACK);
@@ -786,6 +786,15 @@ public class Paint extends Frame
 		}
 		else if( e.getActionCommand().equalsIgnoreCase("Redo") ){
 			redo();
+		}
+		else if( e.getActionCommand().equalsIgnoreCase("読み込み") ){
+			load();
+		}
+		else if( e.getActionCommand().equalsIgnoreCase("上書き保存") ){
+			save();
+		}
+		else if( e.getActionCommand().equalsIgnoreCase("新規保存") ){
+			saveNew();
 		}
 		else{
 
