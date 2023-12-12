@@ -13,6 +13,8 @@ public class FileCtrl {
 
     public static boolean fileSave(){
 
+        System.out.println("loadingFile :"+loadingFile);
+
         if( loadingFile != null ) {
             File file = new File(loadingFile);
             if (file.exists()) {
@@ -22,6 +24,7 @@ public class FileCtrl {
 
         return fileSave(1);
     }
+
     /**
      * 保存
      * @param mode 0 上書き,1 新規
@@ -37,7 +40,6 @@ public class FileCtrl {
             }
 
             else{
-
                 JFileChooser fileChooser = new JFileChooser();
                 fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 

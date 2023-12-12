@@ -111,6 +111,7 @@ public class Paint extends Frame
 
 		for (int i = 0; i < 4; i++) {
 			Button b = new Button(buttonLabels[i]);
+			b.setBounds(560, 300 + i *30, 120, 30);
 			add(b);
 			b.addActionListener(this);
 			b.addKeyListener(this);
@@ -622,23 +623,22 @@ public class Paint extends Frame
 //		Win : Ctrl + (Z + <-)
 		else if (( (key == 'z' || key == 'Z') || e.getKeyCode() == 37 ) && ( e.isMetaDown() || e.isControlDown() )) undo();
 
-
-//		Mac : Command + S
-//		Win : Ctrl + s
-		else if (( key == 's' || key == 'S') && ( e.isMetaDown() || e.isControlDown() )){
-			if(save()){
-				JOptionPane.showMessageDialog(this, "上書き保存しました。");
+//		Mac : Command + Shift + S
+//		Win : Ctrl + Shift + s
+		else if (( key == 's' || key == 'S') && ( e.isMetaDown() || e.isControlDown() ) && e.isShiftDown()){
+			if(saveNew()){
+				JOptionPane.showMessageDialog(this, "新規保存しました。");
 			}
 			else{
 				JOptionPane.showMessageDialog(this, "保存に失敗しました。");
 			}
 		}
 
-//		Mac : Command + Shift + S
-//		Win : Ctrl + Shift + s
-		else if (( key == 's' || key == 'S') && ( e.isMetaDown() || e.isControlDown() ) && e.isShiftDown()){
-			if(saveNew()){
-				JOptionPane.showMessageDialog(this, "新規保存しました。");
+//		Mac : Command + S
+//		Win : Ctrl + s
+		else if (( key == 's' || key == 'S') && ( e.isMetaDown() || e.isControlDown() )){
+			if(save()){
+				JOptionPane.showMessageDialog(this, "上書き保存しました。");
 			}
 			else{
 				JOptionPane.showMessageDialog(this, "保存に失敗しました。");
