@@ -204,7 +204,7 @@ public class Paint extends Frame
 
 		updateHistoryButton();
 
-		//		2Dにキャスト
+//		2Dにキャスト
 		Graphics2D g2 = (Graphics2D) g;
 
 		//		線分リストをループ
@@ -322,6 +322,8 @@ public class Paint extends Frame
 
 		if( isDrawLock ) return;
 
+		this.setCursor(new Cursor(Cursor.CROSSHAIR_CURSOR));
+
 		if(otherList.get(0) instanceof Checkbox isFillCheckbox){
 
 			isFill = isFillCheckbox.getState();
@@ -351,6 +353,7 @@ public class Paint extends Frame
 
 			//			null => 全体移動用
 			mode = 2;
+			this.setCursor(new Cursor(Cursor.HAND_CURSOR));
 		}
 
 		// 右
@@ -382,6 +385,8 @@ public class Paint extends Frame
 	public void mouseReleased(MouseEvent e) {
 
 		if( isDrawLock ) return;
+
+		this.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
 
 		if (mode != 2 && c != null) {
 
@@ -721,15 +726,10 @@ public class Paint extends Frame
 	}
 
 	@Override
-	public void keyReleased(KeyEvent e) {
-		// TODO 自動生成されたメソッド・スタブ
-
-	}
+	public void keyReleased(KeyEvent e) {}
 
 	@Override
 	public void mouseWheelMoved(MouseWheelEvent e) {
-
-		// TODO 自動生成されたメソッド・スタブ
 
 		//		マウスが動いた分　＊　マウスが動いた向き　をsizeに足す
 		this.size += e.getScrollAmount() * e.getWheelRotation();

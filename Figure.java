@@ -19,7 +19,6 @@ public class Figure extends Coord{
 	boolean isFill;
 	
 	public Figure() {
-		// TODO 自動生成されたコンストラクター・スタブ
 		color = Color.BLACK;
 		w = h = 0;
 	}
