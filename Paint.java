@@ -947,8 +947,6 @@ public class Paint extends Frame
 		} else return choice == JOptionPane.NO_OPTION;
 	}
 
-
-
 	@Override
 	public void itemStateChanged(ItemEvent e) {
 
