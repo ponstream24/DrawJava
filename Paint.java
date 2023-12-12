@@ -53,11 +53,11 @@ public class Paint extends Frame
     public Color customColor = Color.BLACK; // 色
     public int size = 1; // 太さ
     /**
-     *  0:通常描画
-     *  1:大きさ変更して描画
-     *  2:全体移動
-     *  3:線
-     *  4:消しゴム
+     * 0:通常描画
+     * 1:大きさ変更して描画
+     * 2:全体移動
+     * 3:線
+     * 4:消しゴム
      */
     int mode = 0;
     /**

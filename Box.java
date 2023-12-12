@@ -63,15 +63,6 @@ public class Box extends Figure {
                 g.drawRect(x + w, y + h, -w, -h);
             }
         }
-
-//		
-//
-//		if (this.isFill) {
-//			g.fillRect(x - w / 2, y - h / 2, w, h);
-//		} else {
-//			g.fillRect(x - w / 2, y - h / 2, w, h);
-//
-//		}
     }
 
 
@@ -84,8 +75,6 @@ public class Box extends Figure {
             g.setColor(this.color);
         }
 
-//		g.fillRect(x - size / 2, y - size / 2, size, size);
-//		g.fillRect(x, y, w, h);
         g.fillRect(x - w / 2, y - h / 2, w, h);
     }
 
