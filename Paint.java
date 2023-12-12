@@ -584,10 +584,7 @@ public class Paint extends Frame
 	}
 
 	@Override
-	public void keyTyped(KeyEvent e) {
-		// TODO 自動生成されたメソッド・スタブ
-
-	}
+	public void keyTyped(KeyEvent e) {}
 
 	@Override
 	public void keyPressed(KeyEvent e) {
