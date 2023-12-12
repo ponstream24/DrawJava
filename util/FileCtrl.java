@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 
 import static enshuReport2_2023.Paint.*;
+import static enshuReport2_2023.util.ShowCtrl.closeNowLoading;
+import static enshuReport2_2023.util.ShowCtrl.nowLoading;
 
 public class FileCtrl {
 
@@ -41,6 +43,10 @@ public class FileCtrl {
                 JFileChooser fileChooser = new JFileChooser();
                 fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 
+                if( loadingFile != null ){
+                    fileChooser.setCurrentDirectory(new File(loadingFile));
+                }
+
                 int result = fileChooser.showSaveDialog(mainFrame);
 
                 if (result == JFileChooser.APPROVE_OPTION) {
@@ -55,11 +61,15 @@ public class FileCtrl {
 
             if( selectedFilePath == null ) return false;
 
+            nowLoading();
+
             FileOutputStream fos = new FileOutputStream(selectedFilePath);
             ObjectOutputStream oos = new ObjectOutputStream(fos);
             oos.writeObject(coordsList);
             oos.close();
             fos.close();
+
+            closeNowLoading();
 
             return true;
         } catch (IOException e) {
@@ -80,21 +90,49 @@ public class FileCtrl {
             String selectedFilePath;
 
             if( path == null ){
-                JFileChooser fileChooser = new JFileChooser();
-                fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 
-                int result = fileChooser.showOpenDialog(mainFrame);
+                Object[] options = {"開く", "新規作成", "キャンセル"};
 
-                if (result == JFileChooser.APPROVE_OPTION) {
+                // ダイアログを表示
+                int typeResult = JOptionPane.showOptionDialog(
+                        null,
+                        "既存のファイルを読み込みますか？",
+                        "読み込み",
+                        JOptionPane.DEFAULT_OPTION,
+                        JOptionPane.QUESTION_MESSAGE,
+                        null,
+                        options,
+                        options[0]);
 
-                    selectedFilePath = fileChooser.getSelectedFile().getAbsolutePath();
+//                既存
+                if( typeResult == 0 ){
 
-                    mainFrame.setTitle(selectedFilePath);
-                    loadingFile = selectedFilePath;
+                    JFileChooser fileChooser = new JFileChooser();
+                    fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 
+                    if( loadingFile != null ){
+                        fileChooser.setCurrentDirectory(new File(loadingFile));
+                    }
+
+                    int result = fileChooser.showOpenDialog(mainFrame);
+
+                    if (result == JFileChooser.APPROVE_OPTION) {
+                        selectedFilePath = fileChooser.getSelectedFile().getAbsolutePath();
+                        mainFrame.setTitle(selectedFilePath);
+                        loadingFile = selectedFilePath;
+                    }
+                    else{
+                        return false;
+                    }
                 }
-                else{
+
+//                新規
+                else if( typeResult == 1 ){
                     mainFrame.setTitle("新規ファイル");
+                    return true;
+                }
+//                キャンセル
+                else{
                     return false;
                 }
             }
@@ -103,11 +141,16 @@ public class FileCtrl {
                 selectedFilePath = path;
             }
 
+            nowLoading();
+
             FileInputStream fis = new FileInputStream(selectedFilePath);
             ObjectInputStream ois = new ObjectInputStream(fis);
             coordsList = (ArrayList<LinkedList<Figure>>) ois.readObject();
             ois.close();
             fis.close();
+
+            closeNowLoading();
+
             return true;
         } catch (IOException | ClassNotFoundException ignored) {
             JOptionPane.showMessageDialog(mainFrame, "ファイルの読み込みに失敗しました。");

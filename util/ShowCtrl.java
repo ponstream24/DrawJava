@@ -8,6 +8,33 @@ import static enshuReport2_2023.Paint.*;
 
 public class ShowCtrl {
 
+    private static JDialog dialog;
+
+    public static void nowLoading(){
+
+        dialog = new JDialog((Frame) null, "Now Loading", false);
+        dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+
+        // ダイアログを閉じるボタンを表示する
+        dialog.setUndecorated(false);
+
+        // 非モーダルダイアログを表示
+        JLabel label = new JLabel("読み込み中...");
+        label.setHorizontalAlignment(JLabel.CENTER);
+        dialog.add(label);
+
+        // ダイアログを表示
+        dialog.setSize(200, 100);
+        dialog.setVisible(true);
+    }
+
+    public static void closeNowLoading(){
+
+        if( dialog != null ){
+            dialog.dispose();
+        }
+    }
+
 
     public static void showError(){
         showError("不明なエラーです");

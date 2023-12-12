@@ -19,8 +19,7 @@ import javax.swing.*;
 import static enshuReport2_2023.util.ColorCtrl.*;
 import static enshuReport2_2023.util.FileCtrl.fileLoad;
 import static enshuReport2_2023.util.FileCtrl.fileSave;
-import static enshuReport2_2023.util.ShowCtrl.setDesign;
-import static enshuReport2_2023.util.ShowCtrl.showError;
+import static enshuReport2_2023.util.ShowCtrl.*;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -69,12 +68,16 @@ public class Paint extends Frame
 	//	psvm
 	public static void main(String[] args) {
 
+		nowLoading();
+
 		//		インスタンス
 		Paint f = new Paint();
 		f.setTitle("2232103");
 		f.setVisible(true);
 		if (args.length >= 1)
 			f.load(args[0]);
+
+		closeNowLoading();
 	}
 
 	//	コンストラクター
@@ -150,7 +153,7 @@ public class Paint extends Frame
 
 		colorGroup = new CheckboxGroup();
 
-		String[] colorLabels = {"黒", "赤", "青", "シアン", "ピンク", "灰色", "緑", "黄", "マゼンタ", "オレンジ", "カスタム"};
+		String[] colorLabels = {"黒", "赤", "青", "水", "薄桃", "灰", "緑", "黄", "桃", "橙", "カスタム"};
 
 		for (String label : colorLabels) {
 			Checkbox checkbox;
@@ -166,6 +169,7 @@ public class Paint extends Frame
 		setDesign();
 
 		historyAdd();
+		isSaved = true;
 	}
 
 	/**
@@ -278,15 +282,7 @@ public class Paint extends Frame
 		}
 
 		//		描画中の点あり　なら　描画
-		if (c != null)
-		{
-//			if( mode == 1 ) {
-//				c.paintCursor(g);
-//			}
-//			else {
-				c.paint(g);
-//			}
-		}
+		if (c != null) c.paint(g);
 
 		//		info用
 		ArrayList<String> info = new ArrayList<>();
@@ -670,6 +666,7 @@ public class Paint extends Frame
 			else{
 				JOptionPane.showMessageDialog(this, "保存に失敗しました。");
 			}
+			return;
 		}
 
 //		Mac : Command + S
@@ -681,6 +678,25 @@ public class Paint extends Frame
 			else{
 				JOptionPane.showMessageDialog(this, "保存に失敗しました。");
 			}
+			return;
+		}
+
+//		Mac : Command + (Q or W)
+//		Win : Ctrl + (Q or W)
+		else if (( key == 'w' || key == 'W' || key == 'q' || key == 'Q') && ( e.isMetaDown() || e.isControlDown() )){
+			if( isSaved || showSaveConfirmDialog() ){
+				dispose();
+			}
+			return;
+		}
+
+//		Mac : Command + N
+//		Win : Ctrl + N
+		else if (( key == 'n' || key == 'N') && ( e.isMetaDown() || e.isControlDown() )){
+			if( isSaved || showSaveConfirmDialog() ){
+				load();
+			}
+			return;
 		}
 
 		else return;
@@ -788,7 +804,10 @@ public class Paint extends Frame
 			redo();
 		}
 		else if( e.getActionCommand().equalsIgnoreCase("読み込み") ){
-			load();
+			if( isSaved || showSaveConfirmDialog() ){
+
+				load();
+			}
 		}
 		else if( e.getActionCommand().equalsIgnoreCase("上書き保存") ){
 			save();
@@ -819,12 +838,18 @@ public class Paint extends Frame
 
 	public void load() {
 		load(null);
-		isSaved = true;
 	}
 
 	public void load(String str) {
-		fileLoad(str);
-		repaint();
+
+		boolean result = fileLoad(str);
+
+		if( result ){
+			coordsList = new ArrayList<>();
+			coords = new LinkedList<>();
+			offScreenImage = null;
+			repaint();
+		}
 	}
 
 	public void updateHistoryButton(){
@@ -860,7 +885,7 @@ public class Paint extends Frame
 
 		if( historyCtrl.getNextUndo() == null ) historyCtrl.undo();
 
-		if( coordsList.size() == historyCtrl.getNextUndo().size() ) historyCtrl.undo();
+		if( historyCtrl.getNextUndo() != null && coordsList.size() == historyCtrl.getNextUndo().size() ) historyCtrl.undo();
 
 		ArrayList<LinkedList<Figure>> _list = historyCtrl.undo();
 		isUndoRedoLastTime = true;
@@ -914,18 +939,12 @@ public class Paint extends Frame
 
 			if(save()){
 				isSaved = true;
-				System.out.println("保存しました。");
 				return true;
 			}
 			else{
 				return false;
 			}
-		} else if (choice == JOptionPane.NO_OPTION) {
-			System.out.println("保存しませんでした。");
-			return true;
-		} else {
-			return false;
-		}
+		} else return choice == JOptionPane.NO_OPTION;
 	}
 
 

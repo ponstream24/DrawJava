@@ -36,3 +36,13 @@
   * 新規保存
     * Ctrl + Shift + S
     * Cmd + Shift + S
+* Close
+  * 閉じる
+    * Ctrl + Q
+    * Cmd + Q
+    * Ctrl + W
+    * Cmd + W
+* Open
+  * 開く
+    * Ctrl + N
+    * Cmd + N
