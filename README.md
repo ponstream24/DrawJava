@@ -2,6 +2,290 @@
 
 簡単なお絵描きソフトです
 
+## 目的
+前回のお絵描きソフトよりも進化したお絵描きソフトを作る。
+
+## 課題
+お絵かきソフトを進化させるにあたり、主に以下の機能の実装に取り組んだ。
+1. 保存・読み込み機能
+2. 編集履歴の操作
+3. ダイヤログ
+4. ボタンチェックボックス
+
+など特にUIに関する部分を充実させた。その他機能は[こちら](#%E4%B8%BB%E3%81%AA%E6%A9%9F%E8%83%BD)に記載する
+
+## 理論
+* スムーズな線分を実現するため、Polylineを使用した。一本の線分だけではなく、連続した線分を使用することでより滑らかな線分を表現することができる。
+
+## 苦労した点
+* ボタンを設置した時にキー入力が行われない問題
+  * AWTのフォーカスについてつまずいたが、ボタンにも`addKeyListener`をつけ問題なく動作した。
+* 履歴の配列
+  * UndoとRedoをそれぞれ配列に格納しているが、Undoに現在のデータを格納するタイミングや、取り出す際の重複問題に苦戦した。
+
+## プログラム(抜粋)
+### 閉じる前に確認
+Paint.java
+```java
+this.addWindowListener(new WindowAdapter() {
+    @Override
+    public void windowClosing(WindowEvent e) {
+        if (isSaved || showSaveConfirmDialog()) {
+            dispose();
+        }
+    }
+});
+```
+Paint.java
+```java
+private boolean showSaveConfirmDialog() {
+
+    int choice = JOptionPane.showConfirmDialog(this, "保存しますか?", "確認", JOptionPane.YES_NO_CANCEL_OPTION);
+
+    if (choice == JOptionPane.YES_OPTION) {
+
+        if (save()) {
+            isSaved = true;
+            return true;
+        } else {
+            return false;
+        }
+    } else return choice == JOptionPane.NO_OPTION;
+}
+```
+Windowを閉じるリクエストが発生した時に、`保存済みか||保存完了したか`を確認して保存漏れが内容にした。
+
+### HistoryCtrlクラス
+HistoryCtrl.java
+```java
+package enshuReport2_2023.util;
+
+import enshuReport2_2023.Figure;
+
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Stack;
+
+public class HistoryCtrl {
+
+    private final Stack<ArrayList<LinkedList<Figure>>> undoList = new Stack<>();
+    private final Stack<ArrayList<LinkedList<Figure>>> redoList = new Stack<>();
+
+    /**
+     * 一つ戻る
+     * @return null or Stack
+     */
+    public ArrayList<LinkedList<Figure>> undo() {
+
+//        undoするものなし
+        if (this.undoList.size() <= 0) return null;
+
+//        ドゥー
+        return doUndo();
+    }
+
+    private ArrayList<LinkedList<Figure>> doUndo() {
+
+        ArrayList<LinkedList<Figure>> result = this.undoList.pop();
+
+        this.redoList.push(result);
+
+        return result;
+    }
+
+    /**
+     * やり直し
+     * @return null or Stack
+     */
+    public ArrayList<LinkedList<Figure>> redo() {
+
+        if (this.redoList.size() <= 0) return null;
+
+        return doRedo();
+    }
+
+    private ArrayList<LinkedList<Figure>> doRedo() {
+
+        ArrayList<LinkedList<Figure>> result = this.redoList.pop();
+
+        this.undoList.push(result);
+
+        return result;
+    }
+
+    /**
+     * 履歴に追加
+     */
+    public void add(ArrayList<LinkedList<Figure>> history) {
+
+        ArrayList<LinkedList<Figure>> h = new ArrayList<>(history);
+
+        this.undoList.push(h);
+        this.redoList.clear();
+    }
+
+    public Stack<ArrayList<LinkedList<Figure>>> getUndoList() {
+
+        return this.undoList;
+    }
+
+    public Stack<ArrayList<LinkedList<Figure>>> getRedoList() {
+        return this.redoList;
+    }
+
+    public ArrayList<LinkedList<Figure>> getNextUndo() {
+
+        if (this.undoList.size() == 0) return null;
+
+        return this.undoList.get(this.undoList.size() - 1);
+    }
+
+    public ArrayList<LinkedList<Figure>> getNextRedo() {
+
+        if (this.redoList.size() == 0) return null;
+
+        return this.redoList.get(this.redoList.size() - 1);
+    }
+}
+```
+StackでUndoとRedoのリストを管理して、随時追加削除を行っている。
+
+### どの方向にでも描けるようにする
+Box.java, Circle.java
+```java
+if (w >= 0 && h >= 0) {
+    g.fillRect(x, y, w, h);
+} else if (w < 0 && h >= 0) {
+    g.fillRect(x + w, y, -w, h);
+} else if (w >= 0) {
+    g.fillRect(x, y + h, w, -h);
+} else{
+    g.fillRect(x+w,y+h,-w,-h);
+}
+```
+4方向に分けて処理する。
+
+### リサイズ
+Paint.java
+```java
+this.addComponentListener(new ComponentAdapter() {
+    @Override
+    public void componentResized(ComponentEvent e) {
+        setDesign();
+    }
+});
+```
+ShowCtrl.java
+```java
+public static void setDesign() {
+
+    int margin_top = 50;
+    int margin_right = 20;
+    int interval = 10;
+
+//		画面のサイズ
+    double widthMax = mainFrame.getSize().getWidth();
+    double heightMax = mainFrame.getSize().getHeight();
+
+//		現在の位置
+    double _w = widthMax - margin_right;
+    double _h = margin_top;
+
+//		checkボックス設定
+    double checkbox_w = 80;
+    double checkbox_h = 30;
+
+    for (Checkbox checkbox : cgCheckBoxList) {
+
+        int x = (int) (_w - checkbox_w);
+        int y = (int) _h;
+        int w = (int) checkbox_w;
+        int h = (int) checkbox_h;
+
+        checkbox.setBounds(x, y, w, h);
+
+//			更新
+        _h += checkbox_h + interval;
+    }
+
+//		間隔
+    _w -= checkbox_w + interval;
+    checkbox_w = 120;
+    double __h = margin_top;
+
+    for (Checkbox checkbox : colorList) {
+
+        int x = (int) (_w - checkbox_w);
+        int y = (int) __h;
+        int w = (int) checkbox_w;
+        int h = (int) checkbox_h;
+
+        checkbox.setBounds(x, y, w, h);
+
+//			更新
+        __h += checkbox_h + interval;
+    }
+
+//		間隔
+    _h += 20;
+    _w = widthMax - margin_right;
+
+    checkbox_w = 100;
+
+    for (Component component : otherList) {
+
+        int x = (int) (_w - checkbox_w);
+        int y = (int) _h;
+        int w = (int) checkbox_w;
+        int h = (int) checkbox_h;
+
+        component.setBounds(x, y, w, h);
+
+//			更新
+        _h += checkbox_h + interval;
+    }
+
+//		間隔
+    _h += 20;
+
+//		ボタン設定
+    double button_w = 120;
+    double button_h = 30;
+
+    for (Button button : buttonList) {
+
+        int x = (int) (_w - button_w);
+        int y = (int) _h;
+        int w = (int) button_w;
+        int h = (int) button_h;
+
+        button.setBounds(x, y, w, h);
+
+//			更新
+        _h += checkbox_h + interval;
+    }
+}
+```
+
+## 動作確認手法・環境
+以下の実行環境で行った
+* Eclipse上で制御文字が使えるようにASCII制御文字をオンにした。
+* 手順は以下のURLの通り、設定->実行/デバック->コンソール->ASCII制御文字を解釈する->復帰文字(\r)を制御文字として解釈する をオンにする
+* https://eclipse.dev/eclipse/news/4.14/platform.php#control-character-console
+* 環境
+  * JRE -> JavaSE-17
+  * OS  -> Windows 10 Pro
+  * プロセッサ -> Intel(R) Core(TM) i5-7500T CPU @ 2.70GHz   2.71 GHz
+  * RAM -> 8.00 GB
+* 環境2 
+  * JRE -> JavaSE-17
+  * OS  -> macOS Canalia
+  * プロセッサ -> 1.6 GHz デュアルコアIntel Core i5
+  * RAM -> 8 GB 2133 MHz LPDDR3
+
+## 実行結果
+
+
 ## 主な機能
 
 * 筆
@@ -43,7 +327,7 @@
         * 描画モード
 * キーボード
     * ショートカットキー
-        * [詳細はこちら](https://github.com/ponstream24/DrawJava#%E3%82%B7%E3%83%A7%E3%83%BC%E3%83%88%E3%82%AB%E3%83%83%E3%83%88)
+        * [詳細はこちら](#%E3%82%B7%E3%83%A7%E3%83%BC%E3%83%88%E3%82%AB%E3%83%83%E3%83%88)
     * 数字キー
         * 対象の数字キーを押すことで筆の色を変更できます。
 * スクロール
@@ -66,10 +350,12 @@
 * 画面リサイズ
     * ウィンドウのサイズを変更すると、右側に表示されているボックスなどの位置も動的に変更されます。
 * チェックボックス/ボタン
+  * 以下の機能を実装
     * 色
     * 描画種類
     * コントール
     * アクション
+  * 動的に配置しているため、急遽ボタンを増やしてもデザインが崩れない。
 * 終了
     * 終了時に保存していなかった場合、保存確認のダイヤログが表示されます。
         * キャンセル/保存しない/保存から選択できます。
