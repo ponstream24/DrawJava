@@ -40,13 +40,6 @@ public class HistoryCtrl {
 
         this.redoList.push(result);
 
-        for (ArrayList<LinkedList<Figure>> linkedList : undoList ) {
-            System.out.println(linkedList);
-        }
-
-        System.out.println("↓");
-        System.out.println(result);
-
         return result;
     }
 
@@ -67,13 +60,6 @@ public class HistoryCtrl {
 
         this.undoList.push(result);
 
-        for (ArrayList<LinkedList<Figure>> linkedList : redoList ) {
-            System.out.println(linkedList);
-        }
-
-        System.out.println("↓");
-        System.out.println(result);
-
         return result;
     }
 
@@ -82,27 +68,14 @@ public class HistoryCtrl {
      */
     public void add(ArrayList<LinkedList<Figure>> history){
 
-//        直前のリスト数と同じ
-        if( this.undoList.size() > 1 && history.size() == this.undoList.size() ){
-            System.out.println("同じ : " + history.size());
-//            return;
-        }
-
         ArrayList<LinkedList<Figure>> h = new ArrayList<>(history);
 
         this.undoList.push(h);
         this.redoList.clear();
-
-        System.out.println();
-
-        for (ArrayList<LinkedList<Figure>> linkedList : undoList ) {
-            System.out.println(linkedList);
-        }
     }
 
     public Stack<ArrayList<LinkedList<Figure>>> getUndoList() {
 
-        System.out.println("参照 : " + this.undoList);
         return this.undoList;
     }
 

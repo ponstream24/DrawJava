@@ -17,22 +17,11 @@ import enshuReport2_2023.util.HistoryCtrl;
 import javax.swing.*;
 
 import static enshuReport2_2023.util.ColorCtrl.*;
+import static enshuReport2_2023.util.FileCtrl.fileLoad;
+import static enshuReport2_2023.util.FileCtrl.fileSave;
 
-import java.awt.BasicStroke;
-import java.awt.Button;
-import java.awt.Checkbox;
-import java.awt.CheckboxGroup;
-import java.awt.Color;
-import java.awt.Frame;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Image;
+import java.awt.*;
 import java.awt.event.*;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
@@ -44,18 +33,23 @@ public class Paint extends Frame
 		implements MouseListener, MouseMotionListener, KeyListener, MouseWheelListener, ActionListener {
 
 	//	初期化
-	int x, y;
-	Color color = Color.BLACK; // 色
-	int size = 1; // 太さ
-	Figure c; // 点
-	LinkedList<Figure> coords = new LinkedList<>();// 線分
-	ArrayList<LinkedList<Figure>> coordsList = new ArrayList<LinkedList<Figure>>(); //　線分リスト
+	public static Frame mainFrame;
+	public static String loadingFile = null;
+	public int x, y;
+	public boolean isUndoRedoLastTime = false;
+	public boolean isFill = false;
+	public boolean isSaved = true;
+	public Color color = Color.BLACK; // 色
+	public int size = 1; // 太さ
+	public Figure c; // 点
+	public LinkedList<Figure> coords = new LinkedList<>();// 線分
+	public static ArrayList<LinkedList<Figure>> coordsList = new ArrayList<>(); //　線分リスト
 
-	HistoryCtrl historyCtrl = new HistoryCtrl();
+	public HistoryCtrl historyCtrl = new HistoryCtrl();
 
-	CheckboxGroup cbg;
-	Checkbox c1, c2, c3, c4;
-	Button end, undo, redo, colorSelect;
+	public CheckboxGroup cbg;
+	public ArrayList<Checkbox> cgCheckBoxList = new ArrayList<>();
+	public ArrayList<Button> buttonList = new ArrayList<>();
 
 	/**
 	 *  0:通常描画
@@ -71,18 +65,12 @@ public class Paint extends Frame
 
 		//		インスタンス
 		Paint f = new Paint();
+		Paint.mainFrame = f;
 		f.setSize(640, 480);
 		f.setTitle("2232103");
-		f.addWindowListener(new WindowAdapter() {
-
-			@Override
-			public void windowClosing(WindowEvent e) {
-				System.exit(0);
-			}
-		});
 		f.setVisible(true);
-		if (args.length == 1)
-			f.load("paint.dat");
+		if (args.length >= 1)
+			f.load(args[0]);
 	}
 
 	//	コンストラクター
@@ -95,56 +83,67 @@ public class Paint extends Frame
 		this.addKeyListener(this);
 		this.addMouseWheelListener(this);
 
+		this.addWindowListener(new WindowAdapter() {
+
+			@Override
+			public void windowClosing(WindowEvent e) {
+				if( isSaved || showSaveConfirmDialog() ){
+					dispose();
+				}
+			}
+		});
+
 		setLayout(null);
+
 		cbg = new CheckboxGroup();
 
-		c1 = new Checkbox("丸", cbg, true);
-		c1.setBounds(560, 30, 60, 30);
-		add(c1);
-		c1.addKeyListener(this);
+		String[] labels = {"自由線", "円", "四角", "線"};
 
-		c2 = new Checkbox("円", cbg, false);
-		c2.setBounds(560, 60, 60, 30);
-		add(c2);
-		c2.addKeyListener(this);
+		for (int i = 0; i < 4; i++) {
+			Checkbox checkbox;
+			checkbox = new Checkbox(labels[i], cbg, true);
+			add(checkbox);
+			checkbox.addKeyListener(this);
+			cgCheckBoxList.add(checkbox);
+		}
 
-		c3 = new Checkbox("四角", cbg, false);
-		c3.setBounds(560, 90, 60, 30);
-		add(c3);
-		c3.addKeyListener(this);
+		String[] buttonLabels = {"色を選択", "Undo", "Redo", "終了"};
 
-		c4 = new Checkbox("線", cbg, false);
-		c4.setBounds(560, 120, 60, 30);
-		add(c4);
-		c4.addKeyListener(this);
+		for (int i = 0; i < 4; i++) {
+			Button b = new Button(buttonLabels[i]);
+			add(b);
+			b.addActionListener(this);
+			b.addKeyListener(this);
+			buttonList.add(b);
+		}
+//
+//		colorSelect = new Button("色を選択");
+//		colorSelect.setBounds(560, 300, 120, 30);
+//		add(colorSelect);
+//
+//		undo = new Button("Undo");
+//		undo.setBounds(560, 330, 120, 30);
+//		add(undo);
+//
+//		redo = new Button("Redo");
+//		redo.setBounds(560, 360, 120, 30);
+//		add(redo);
+//
+//		end = new Button("終了");
+//		end.setBounds(560, 360, 60, 30);
+//		add(end);
+//
+//		end.addActionListener(this);
+//		colorSelect.addActionListener(this);
+//		undo.addActionListener(this);
+//		redo.addActionListener(this);
+//
+//		end.addKeyListener(this);
+//		undo.addKeyListener(this);
+//		redo.addKeyListener(this);
+//		colorSelect.addKeyListener(this);
 
-		colorSelect = new Button("色を選択");
-		colorSelect.setBounds(560, 300, 120, 30);
-		add(colorSelect);
-
-		undo = new Button("Undo");
-		undo.setBounds(560, 330, 120, 30);
-		add(undo);
-
-		redo = new Button("Redo");
-		redo.setBounds(560, 360, 120, 30);
-		add(redo);
-
-		end = new Button("終了");
-		end.setBounds(560, 360, 60, 30);
-		add(end);
-
-		end.addActionListener(this);
-		colorSelect.addActionListener(this);
-		undo.addActionListener(this);
-		redo.addActionListener(this);
-
-		end.addKeyListener(this);
-		undo.addKeyListener(this);
-		redo.addKeyListener(this);
-		colorSelect.addKeyListener(this);
-
-		historyCtrl.add(coordsList);
+		historyAdd();
 	}
 
 	/**
@@ -305,16 +304,16 @@ public class Paint extends Frame
 
 		Checkbox cb = cbg.getSelectedCheckbox();
 
-		if (cb == c1) {
+		if (cb == cgCheckBoxList.get(0)) {
 			c = new Dot();
 			mode = 0;
-		} else if (cb == c2) {
+		} else if (cb == cgCheckBoxList.get(1)) {
 			c = new Circle();
 			mode = 1;
-		} else if (cb == c3) {
+		} else if (cb == cgCheckBoxList.get(2)) {
 			c = new Box();
 			mode = 1;
-		} else if (cb == c4) {
+		} else if (cb == cgCheckBoxList.get(3)) {
 			c = new Line(this.size);
 			mode = 3;
 		} else {
@@ -322,22 +321,18 @@ public class Paint extends Frame
 			mode = 0;
 		}
 
-		// 左
-		if (e.getButton() == MouseEvent.BUTTON1) {
-
-		}
-
 		// 中央
-		else if (e.getButton() == MouseEvent.BUTTON2) {
+		if (e.getButton() == MouseEvent.BUTTON2) {
 
 			//			null => 全体移動用
 			mode = 2;
 		}
 
 		// 右
-		else {
+		else if (e.getButton() == MouseEvent.BUTTON3){
 
 			//			消しゴム用四角
+			c = new Box(true);
 			mode = 4;
 		}
 
@@ -360,13 +355,7 @@ public class Paint extends Frame
 	@Override
 	public void mouseReleased(MouseEvent e) {
 
-		// 全体移動用なら
-		if (mode == 2) {
-
-		}
-
-		//		描画中の点があるなら
-		else if (c != null) {
+		if (mode != 2 && c != null) {
 
 			//			点を深層クローン
 			Figure _Coord = c.clone();
@@ -382,7 +371,7 @@ public class Paint extends Frame
 
 			//			線分リストに線分を追加
 			coordsList.add(coords);
-			historyCtrl.add(coordsList);
+			historyAdd();
 		}
 		
 		
@@ -419,20 +408,6 @@ public class Paint extends Frame
 
 	@Override
 	public void mouseDragged(MouseEvent e) {
-
-		Checkbox cb = cbg.getSelectedCheckbox();
-
-		//		if( cb == c4 ) {
-		////			オフスクリーンをリセット
-		//			offScreenImage = null;
-		//
-		//			//		再描画をリクエスト
-		//			repaint();
-		//
-		//			//		座標を更新
-		//			x = e.getX();
-		//			y = e.getY();
-		//		}
 
 		// 全体移動用なら
 		if (mode == 2) {
@@ -621,37 +596,65 @@ public class Paint extends Frame
 		int key = e.getKeyChar();
 
 		//		もしキーが〇なら◇色にcolorを設定
-		if (key == '1') {
-			color = Color.BLACK;
-		} else if (key == '2') {
-			color = Color.RED;
-		} else if (key == '3') {
-			color = Color.BLUE;
-		} else if (key == '4') {
-			color = Color.CYAN;
-		} else if (key == '5') {
-			color = Color.PINK;
-		} else if (key == '6') {
-			color = Color.GRAY;
-		} else if (key == '7') {
-			color = Color.GREEN;
-		} else if (key == '8') {
-			color = Color.YELLOW;
-		} else if (key == '9') {
-			color = Color.MAGENTA;
-		} else if (key == '0') {
-			color = Color.ORANGE;
-		} else if (key == 'r' || key == 'R') {
+		if (key == '1') color = Color.BLACK;
+		else if (key == '2') color = Color.RED;
+		else if (key == '3') color = Color.BLUE;
+		else if (key == '4') color = Color.CYAN;
+		else if (key == '5') color = Color.PINK;
+		else if (key == '6') color = Color.GRAY;
+		else if (key == '7') color = Color.GREEN;
+		else if (key == '8') color = Color.YELLOW;
+		else if (key == '9') color = Color.MAGENTA;
+		else if (key == '0') color = Color.ORANGE;
+		else if (key == 'r' || key == 'R') {
 			coordsList = new ArrayList<>();
 			coords = new LinkedList<>();
-		} else {
-			//			数字以外
-			return;
 		}
+
+//		Mac : Command + Z + Shift
+//		Win : Ctrl + Z + Shift(じゃないの？)  Ctrl + Z
+		else if (
+					(( (key == 'z' || key == 'Z') || e.getKeyCode() == 39 ) &&
+					( ( e.isMetaDown() || e.isControlDown() ) ) &&
+					e.isShiftDown()
+				) ||
+				( (key == 'y' || key == 'Y') && e.isControlDown() )
+		) redo();
+
+//		Mac : Command + (Z + <-)
+//		Win : Ctrl + (Z + <-)
+		else if (( (key == 'z' || key == 'Z') || e.getKeyCode() == 37 ) && ( e.isMetaDown() || e.isControlDown() )) undo();
+
+
+//		Mac : Command + S
+//		Win : Ctrl + s
+		else if (( key == 's' || key == 'S') && ( e.isMetaDown() || e.isControlDown() )){
+			if(save()){
+				JOptionPane.showMessageDialog(this, "上書き保存しました。");
+			}
+			else{
+				JOptionPane.showMessageDialog(this, "保存に失敗しました。");
+			}
+		}
+
+//		Mac : Command + Shift + S
+//		Win : Ctrl + Shift + s
+		else if (( key == 's' || key == 'S') && ( e.isMetaDown() || e.isControlDown() ) && e.isShiftDown()){
+			if(saveNew()){
+				JOptionPane.showMessageDialog(this, "新規保存しました。");
+			}
+			else{
+				JOptionPane.showMessageDialog(this, "保存に失敗しました。");
+			}
+		}
+
+		else return;
+
+//		色を変えるごとに保存　-> 需要ない
+//		if( coords.size() > 0 ) historyAdd();
 
 		//		線分を線分リストに追加
 		coordsList.add(coords);
-		historyCtrl.add(coordsList);
 
 		//		線分を初期化
 		coords = new LinkedList<>();
@@ -701,7 +704,8 @@ public class Paint extends Frame
 
 		//		線分を線分リストに追加
 		coordsList.add(coords);
-		historyCtrl.add(coordsList);
+
+//		historyAdd();
 
 		//		線分を初期化
 		coords = new LinkedList<>();
@@ -725,14 +729,14 @@ public class Paint extends Frame
 
 			//		線分を線分リストに追加
 			coordsList.add(coords);
-			historyCtrl.add(coordsList);
+//			historyAdd();
 
 			//		線分を初期化
 			coords = new LinkedList<>();
 
 			//		色をセット
 			c.color = this.color;
-			colorSelect.setBackground(this.color);
+			buttonList.get(0).setBackground(this.color);
 
 			//		オフスクリーンをリセット
 			offScreenImage = null;
@@ -742,112 +746,139 @@ public class Paint extends Frame
 		}
 
 		else if( e.getActionCommand().equalsIgnoreCase("Undo") ){
-
-			if( historyCtrl.getNextUndo() == null ){
-				System.out.println(historyCtrl.getUndoList());
-				System.out.println("Undo 限界");
-				return;
-			}
-
-			if( coordsList.size() == historyCtrl.getUndoList().size() ){
-				historyCtrl.undo();
-			}
-
-			System.out.println(historyCtrl.getUndoList());
-			System.out.println("復元 : " + coordsList.size() + " -> " + historyCtrl.getUndoList().size());
-
-			ArrayList<LinkedList<Figure>> _list = historyCtrl.undo();
-
-			System.out.println("Undo : "+(historyCtrl.getUndoList().size()+1 )+"->"+historyCtrl.getUndoList().size());
-
-			System.out.println(_list);
-			if( _list == null ) return;
-
-			System.out.println("Undo更新");
-
-			coordsList = _list;
-
-			//		オフスクリーンをリセット
-			offScreenImage = null;
-
-			//		再描画をリクエスト
-			repaint();
+			undo();
 		}
 		else if( e.getActionCommand().equalsIgnoreCase("Redo") ){
-
-			if( historyCtrl.getNextRedo() == null ){
-
-				System.out.println(historyCtrl.getRedoList());
-				System.out.println("Redo 限界");
-				return;
-			}
-
-			System.out.println(historyCtrl.getRedoList());
-//			if( historyCtrl.getNextRedo() == coordsList ){
-//				historyCtrl.redo();
-//			}
-
-			if( coordsList.size() == historyCtrl.getRedoList().size() ){
-				historyCtrl.redo();
-			}
-
-			ArrayList<LinkedList<Figure>> _list = historyCtrl.redo();
-			System.out.println("Redo : "+(historyCtrl.getRedoList().size()+1) +"->"+historyCtrl.getRedoList().size());
-
-			System.out.println(_list);
-			if( _list == null ) return;
-
-			System.out.println("Redo更新");
-
-			coordsList = _list;
-
-			//		オフスクリーンをリセット
-			offScreenImage = null;
-
-			//		再描画をリクエスト
-			repaint();
+			redo();
 		}
 		else{
 
-			save("paint.dat");
+			save();
 			System.exit(0);
 		}
 
 		updateHistoryButton();
 	}
 
-	public void save(String fname) {
-		try {
-			FileOutputStream fos = new FileOutputStream(fname);
-			ObjectOutputStream oos = new ObjectOutputStream(fos);
-			oos.writeObject(coordsList);
-			oos.close();
-			fos.close();
-		} catch (IOException e) {
-			// TODO: handle exception
-		}
+	public boolean save() {
+		boolean result = fileSave();
+		if( result ) isSaved = true;
+		return result;
+	}
+	public boolean saveNew() {
+		boolean result = fileSave(1);
+		if( result ) isSaved = true;
+		return result;
 	}
 
-	@SuppressWarnings("unchecked")
-	public void load(String fname) {
-		try {
-			FileInputStream fis = new FileInputStream(fname);
-			ObjectInputStream ois = new ObjectInputStream(fis);
-			coordsList = (ArrayList<LinkedList<Figure>>) ois.readObject();
-			ois.close();
-			fis.close();
-		} catch (IOException | ClassNotFoundException ignored) {
-		}
+	public void load() {
+		load(null);
+		isSaved = true;
+	}
 
+	public void load(String str) {
+		fileLoad(str);
 		repaint();
 	}
 
 	public void updateHistoryButton(){
 
-		if( historyCtrl.getNextUndo() == null ) undo.setEnabled(false);
-		else undo.setEnabled(true);
+		buttonList.get(1).setEnabled(historyCtrl.getNextUndo() != null);
 
-		if( historyCtrl.getNextRedo() == null ) redo.setEnabled(false);
-		else redo.setEnabled(true);
+		buttonList.get(2).setEnabled(historyCtrl.getNextRedo() != null);
+	}
+
+	private void historyAdd(){
+
+		isSaved = false;
+
+		if( isUndoRedoLastTime ) {
+
+//				履歴に追加
+			ArrayList<LinkedList<Figure>> cloneCoordsList = new ArrayList<>(coordsList);
+			cloneCoordsList.remove(cloneCoordsList.size() - 1);
+			historyCtrl.add(cloneCoordsList);
+			historyCtrl.add(coordsList);
+		}
+
+		else {
+
+//				履歴に追加
+			historyCtrl.add(coordsList);
+		}
+
+		isUndoRedoLastTime = false;
+	}
+
+	private void undo(){
+
+		if( historyCtrl.getNextUndo() == null ) historyCtrl.undo();
+
+		if( coordsList.size() == historyCtrl.getNextUndo().size() ) historyCtrl.undo();
+
+		ArrayList<LinkedList<Figure>> _list = historyCtrl.undo();
+		isUndoRedoLastTime = true;
+
+		if( _list == null ){
+			coordsList = new ArrayList<>();
+
+			//		オフスクリーンをリセット
+			offScreenImage = null;
+
+			//		再描画をリクエスト
+			repaint();
+			return;
+		}
+		else{
+			coordsList = _list;
+		}
+
+		//		オフスクリーンをリセット
+		offScreenImage = null;
+
+		//		再描画をリクエスト
+		repaint();
+	}
+
+	private void redo(){
+
+		if( historyCtrl.getNextRedo() == null ) return;
+
+		if( coordsList.size() == historyCtrl.getNextRedo().size() ) historyCtrl.redo();
+
+		ArrayList<LinkedList<Figure>> _list = historyCtrl.redo();
+		isUndoRedoLastTime = true;
+
+		if( _list == null ) return;
+
+		coordsList = _list;
+
+		//		オフスクリーンをリセット
+		offScreenImage = null;
+
+		//		再描画をリクエスト
+		repaint();
+	}
+
+	private boolean showSaveConfirmDialog(){
+
+		int choice = JOptionPane.showConfirmDialog(this, "保存しますか?", "確認", JOptionPane.YES_NO_CANCEL_OPTION);
+
+		if (choice == JOptionPane.YES_OPTION) {
+
+			if(save()){
+				isSaved = true;
+				System.out.println("保存しました。");
+				return true;
+			}
+			else{
+				return false;
+			}
+		} else if (choice == JOptionPane.NO_OPTION) {
+			System.out.println("保存しませんでした。");
+			return true;
+		} else {
+			return false;
+		}
 	}
 }
