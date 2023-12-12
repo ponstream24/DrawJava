@@ -1,9 +1,9 @@
 /**
  * Yuki Tetsuka
- *
+ * <p>
  * Project: DrawJava
  * Description: A simple drawing application in Java.
- *
+ * <p>
  * Copyright (c) 2023 Yuki Tetsuka. All rights reserved.
  * See the project repository at: https://github.com/ponstream24/DrawJava
  */
@@ -25,16 +25,16 @@ public class HistoryCtrl {
      * 一つ戻る
      * @return null or Stack
      */
-    public ArrayList<LinkedList<Figure>> undo(){
+    public ArrayList<LinkedList<Figure>> undo() {
 
 //        undoするものなし
-        if( this.undoList.size() <= 0 ) return null;
+        if (this.undoList.size() <= 0) return null;
 
 //        ドゥー
         return doUndo();
     }
 
-    private ArrayList<LinkedList<Figure>> doUndo(){
+    private ArrayList<LinkedList<Figure>> doUndo() {
 
         ArrayList<LinkedList<Figure>> result = this.undoList.pop();
 
@@ -47,14 +47,14 @@ public class HistoryCtrl {
      * やり直し
      * @return null or Stack
      */
-    public ArrayList<LinkedList<Figure>> redo(){
+    public ArrayList<LinkedList<Figure>> redo() {
 
-        if( this.redoList.size() <= 0 ) return null;
+        if (this.redoList.size() <= 0) return null;
 
         return doRedo();
     }
 
-    private ArrayList<LinkedList<Figure>> doRedo(){
+    private ArrayList<LinkedList<Figure>> doRedo() {
 
         ArrayList<LinkedList<Figure>> result = this.redoList.pop();
 
@@ -66,7 +66,7 @@ public class HistoryCtrl {
     /**
      * 履歴に追加
      */
-    public void add(ArrayList<LinkedList<Figure>> history){
+    public void add(ArrayList<LinkedList<Figure>> history) {
 
         ArrayList<LinkedList<Figure>> h = new ArrayList<>(history);
 
@@ -83,16 +83,17 @@ public class HistoryCtrl {
         return this.redoList;
     }
 
-    public ArrayList<LinkedList<Figure>> getNextUndo(){
+    public ArrayList<LinkedList<Figure>> getNextUndo() {
 
-        if( this.undoList.size() == 0 ) return null;
+        if (this.undoList.size() == 0) return null;
 
-        return this.undoList.get( this.undoList.size() - 1);
+        return this.undoList.get(this.undoList.size() - 1);
     }
-    public ArrayList<LinkedList<Figure>> getNextRedo(){
 
-        if( this.redoList.size() == 0 ) return null;
+    public ArrayList<LinkedList<Figure>> getNextRedo() {
 
-        return this.redoList.get( this.redoList.size() - 1);
+        if (this.redoList.size() == 0) return null;
+
+        return this.redoList.get(this.redoList.size() - 1);
     }
 }

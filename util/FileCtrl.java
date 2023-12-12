@@ -1,9 +1,9 @@
 /**
  * Yuki Tetsuka
- *
+ * <p>
  * Project: DrawJava
  * Description: A simple drawing application in Java.
- *
+ * <p>
  * Copyright (c) 2023 Yuki Tetsuka. All rights reserved.
  * See the project repository at: https://github.com/ponstream24/DrawJava
  */
@@ -23,9 +23,9 @@ import static enshuReport2_2023.util.ShowCtrl.nowLoading;
 
 public class FileCtrl {
 
-    public static boolean fileSave(){
+    public static boolean fileSave() {
 
-        if( loadingFile != null ) {
+        if (loadingFile != null) {
             File file = new File(loadingFile);
             if (file.exists()) {
                 return fileSave(0);
@@ -39,21 +39,19 @@ public class FileCtrl {
      * 保存
      * @param mode 0 上書き,1 新規
      */
-    public static boolean fileSave(int mode){
+    public static boolean fileSave(int mode) {
 
         try {
 
             String selectedFilePath;
 
-            if( mode == 0 ){
+            if (mode == 0) {
                 selectedFilePath = loadingFile;
-            }
-
-            else{
+            } else {
                 JFileChooser fileChooser = new JFileChooser();
                 fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 
-                if( loadingFile != null ){
+                if (loadingFile != null) {
                     fileChooser.setCurrentDirectory(new File(loadingFile));
                 }
 
@@ -64,12 +62,10 @@ public class FileCtrl {
                     selectedFilePath = fileChooser.getSelectedFile().getAbsolutePath();
                     mainFrame.setTitle(selectedFilePath);
                     loadingFile = selectedFilePath;
-                }
-
-                else return false;
+                } else return false;
             }
 
-            if( selectedFilePath == null ) return false;
+            if (selectedFilePath == null) return false;
 
             nowLoading();
 
@@ -87,18 +83,18 @@ public class FileCtrl {
         return false;
     }
 
-    public static boolean fileLoad(){
+    public static boolean fileLoad() {
         return fileLoad(null);
     }
 
     @SuppressWarnings("unchecked")
-    public static boolean fileLoad(String path){
+    public static boolean fileLoad(String path) {
 
         try {
 
             String selectedFilePath;
 
-            if( path == null ){
+            if (path == null) {
 
                 Object[] options = {"開く", "新規作成", "キャンセル"};
 
@@ -114,12 +110,12 @@ public class FileCtrl {
                         options[0]);
 
 //                既存
-                if( typeResult == 0 ){
+                if (typeResult == 0) {
 
                     JFileChooser fileChooser = new JFileChooser();
                     fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 
-                    if( loadingFile != null ){
+                    if (loadingFile != null) {
                         fileChooser.setCurrentDirectory(new File(loadingFile));
                     }
 
@@ -129,24 +125,21 @@ public class FileCtrl {
                         selectedFilePath = fileChooser.getSelectedFile().getAbsolutePath();
                         mainFrame.setTitle(selectedFilePath);
                         loadingFile = selectedFilePath;
-                    }
-                    else{
+                    } else {
                         return false;
                     }
                 }
 
 //                新規
-                else if( typeResult == 1 ){
+                else if (typeResult == 1) {
                     mainFrame.setTitle("新規ファイル");
                     return true;
                 }
 //                キャンセル
-                else{
+                else {
                     return false;
                 }
-            }
-
-            else{
+            } else {
                 selectedFilePath = path;
             }
 
