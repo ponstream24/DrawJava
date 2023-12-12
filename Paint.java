@@ -50,6 +50,7 @@ public class Paint extends Frame
 	public CheckboxGroup cbg;
 	public ArrayList<Checkbox> cgCheckBoxList = new ArrayList<>();
 	public ArrayList<Button> buttonList = new ArrayList<>();
+	public ArrayList<Component> otherList = new ArrayList<>();
 
 	/**
 	 *  0:通常描画
@@ -106,9 +107,9 @@ public class Paint extends Frame
 
 		String[] labels = {"自由線", "円", "四角", "線"};
 
-		for (int i = 0; i < 4; i++) {
+		for (String label : labels) {
 			Checkbox checkbox;
-			checkbox = new Checkbox(labels[i], cbg, false);
+			checkbox = new Checkbox(label, cbg, false);
 			add(checkbox);
 			checkbox.addKeyListener(this);
 			cgCheckBoxList.add(checkbox);
@@ -116,9 +117,21 @@ public class Paint extends Frame
 
 		cgCheckBoxList.get(0).setState(true);
 
+		String[] otherLabels = {"塗り直し", "描画ロック"};
+
+		for (String otherLabel : otherLabels) {
+			Checkbox checkbox;
+			checkbox = new Checkbox(otherLabel);
+			add(checkbox);
+			checkbox.addKeyListener(this);
+			otherList.add(checkbox);
+		}
+
+		cgCheckBoxList.get(0).setState(true);
+
 		String[] buttonLabels = {"色を選択", "Undo", "Redo", "終了"};
 
-		for (int i = 0; i < 4; i++) {
+		for (int i = 0; i < buttonLabels.length; i++) {
 			Button b = new Button(buttonLabels[i]);
 			b.setBounds(560, 300 + i *30, 120, 30);
 			add(b);
@@ -288,6 +301,11 @@ public class Paint extends Frame
 	@Override
 	public void mousePressed(MouseEvent e) {
 
+		if(otherList.get(0) instanceof Checkbox isFillCheckbox){
+
+			isFill = isFillCheckbox.getState();
+		}
+
 		Checkbox cb = cbg.getSelectedCheckbox();
 
 		if (cb == cgCheckBoxList.get(0)) {
@@ -329,6 +347,7 @@ public class Paint extends Frame
 			c.moveto(e.getX(), e.getY());
 			c.setWH(size, size);
 			c.color = this.color;
+			c.isFill = this.isFill;
 		}
 
 		//		オフスクリーンをリセット
@@ -892,6 +911,24 @@ public class Paint extends Frame
 			int h = (int) checkbox_h;
 
 			checkbox.setBounds(x, y, w, h);
+
+//			更新
+			_h += checkbox_h + interval;
+		}
+
+//		間隔
+		_h += 20;
+
+		checkbox_w = 100;
+
+		for ( Component component : otherList ){
+
+			int x = (int) (_w - checkbox_w);
+			int y = (int) _h ;
+			int w = (int) checkbox_w;
+			int h = (int) checkbox_h;
+
+			component.setBounds(x, y, w, h);
 
 //			更新
 			_h += checkbox_h + interval;
