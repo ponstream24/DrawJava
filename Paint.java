@@ -93,6 +93,12 @@ public class Paint extends Frame
 				}
 			}
 		});
+		this.addComponentListener(new ComponentAdapter() {
+			@Override
+			public void componentResized(ComponentEvent e) {
+				setDesign();
+			}
+		});
 
 		setLayout(null);
 
@@ -102,11 +108,13 @@ public class Paint extends Frame
 
 		for (int i = 0; i < 4; i++) {
 			Checkbox checkbox;
-			checkbox = new Checkbox(labels[i], cbg, true);
+			checkbox = new Checkbox(labels[i], cbg, false);
 			add(checkbox);
 			checkbox.addKeyListener(this);
 			cgCheckBoxList.add(checkbox);
 		}
+
+		cgCheckBoxList.get(0).setState(true);
 
 		String[] buttonLabels = {"色を選択", "Undo", "Redo", "終了"};
 
@@ -120,32 +128,6 @@ public class Paint extends Frame
 		}
 
 		setDesign();
-//
-//		colorSelect = new Button("色を選択");
-//		colorSelect.setBounds(560, 300, 120, 30);
-//		add(colorSelect);
-//
-//		undo = new Button("Undo");
-//		undo.setBounds(560, 330, 120, 30);
-//		add(undo);
-//
-//		redo = new Button("Redo");
-//		redo.setBounds(560, 360, 120, 30);
-//		add(redo);
-//
-//		end = new Button("終了");
-//		end.setBounds(560, 360, 60, 30);
-//		add(end);
-//
-//		end.addActionListener(this);
-//		colorSelect.addActionListener(this);
-//		undo.addActionListener(this);
-//		redo.addActionListener(this);
-//
-//		end.addKeyListener(this);
-//		undo.addKeyListener(this);
-//		redo.addKeyListener(this);
-//		colorSelect.addKeyListener(this);
 
 		historyAdd();
 	}
@@ -610,6 +592,7 @@ public class Paint extends Frame
 		else if (key == 'r' || key == 'R') {
 			coordsList = new ArrayList<>();
 			coords = new LinkedList<>();
+			historyAdd();
 		}
 
 //		Mac : Command + Z + Shift
@@ -753,8 +736,9 @@ public class Paint extends Frame
 		}
 		else{
 
-			save();
-			System.exit(0);
+			if( isSaved || showSaveConfirmDialog() ){
+				dispose();
+			}
 		}
 
 		updateHistoryButton();
@@ -891,9 +875,6 @@ public class Paint extends Frame
 //		画面のサイズ
 		double widthMax = this.getSize().getWidth();
 		double heightMax = this.getSize().getHeight();
-
-		System.out.println("widthMax: "+widthMax);
-		System.out.println("heightMax: "+heightMax);
 
 //		現在の位置
 		double _w = widthMax - margin_right;
