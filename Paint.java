@@ -66,7 +66,6 @@ public class Paint extends Frame
 		//		インスタンス
 		Paint f = new Paint();
 		Paint.mainFrame = f;
-		f.setSize(640, 480);
 		f.setTitle("2232103");
 		f.setVisible(true);
 		if (args.length >= 1)
@@ -76,6 +75,8 @@ public class Paint extends Frame
 	//	コンストラクター
 	public Paint() {
 		c = null;
+
+		this.setSize(640, 480);
 
 		//		各イベント監視開始
 		this.addMouseListener(this);
@@ -117,6 +118,8 @@ public class Paint extends Frame
 			b.addKeyListener(this);
 			buttonList.add(b);
 		}
+
+		setDesign();
 //
 //		colorSelect = new Button("色を選択");
 //		colorSelect.setBounds(560, 300, 120, 30);
@@ -876,6 +879,61 @@ public class Paint extends Frame
 			return true;
 		} else {
 			return false;
+		}
+	}
+
+	private void setDesign(){
+
+		int margin_top = 50;
+		int margin_right = 20;
+		int interval = 10;
+
+//		画面のサイズ
+		double widthMax = this.getSize().getWidth();
+		double heightMax = this.getSize().getHeight();
+
+		System.out.println("widthMax: "+widthMax);
+		System.out.println("heightMax: "+heightMax);
+
+//		現在の位置
+		double _w = widthMax - margin_right;
+		double _h = margin_top;
+
+//		checkボックス設定
+		double checkbox_w = 80;
+		double checkbox_h = 30;
+
+		for ( Checkbox checkbox : cgCheckBoxList ){
+
+			int x = (int) (_w - checkbox_w);
+			int y = (int) _h ;
+			int w = (int) checkbox_w;
+			int h = (int) checkbox_h;
+
+			checkbox.setBounds(x, y, w, h);
+
+//			更新
+			_h += checkbox_h + interval;
+		}
+
+//		間隔
+		_h += 20;
+
+//		ボタン設定
+		double button_w = 120;
+		double button_h = 30;
+
+		for ( Button button : buttonList ){
+
+			int x = (int) (_w - button_w);
+			int y = (int) _h ;
+			int w = (int) button_w;
+			int h = (int) button_h;
+
+			button.setBounds(x, y, w, h);
+
+//			更新
+			_h += checkbox_h + interval;
 		}
 	}
 }

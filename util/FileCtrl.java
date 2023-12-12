@@ -13,8 +13,6 @@ public class FileCtrl {
 
     public static boolean fileSave(){
 
-        System.out.println("loadingFile :"+loadingFile);
-
         if( loadingFile != null ) {
             File file = new File(loadingFile);
             if (file.exists()) {
@@ -48,15 +46,11 @@ public class FileCtrl {
                 if (result == JFileChooser.APPROVE_OPTION) {
 
                     selectedFilePath = fileChooser.getSelectedFile().getAbsolutePath();
-
-                    System.out.println("選択されたファイル: " + selectedFilePath);
                     mainFrame.setTitle(selectedFilePath);
                     loadingFile = selectedFilePath;
-                } else{
-
-                    System.out.println("キャンセル");
-                    return false;
                 }
+
+                else return false;
             }
 
             if( selectedFilePath == null ) return false;
@@ -95,14 +89,11 @@ public class FileCtrl {
 
                     selectedFilePath = fileChooser.getSelectedFile().getAbsolutePath();
 
-                    System.out.println("選択されたファイル: " + selectedFilePath);
                     mainFrame.setTitle(selectedFilePath);
                     loadingFile = selectedFilePath;
 
                 }
                 else{
-
-                    System.out.println("キャンセル -> 新規ファイル");
                     mainFrame.setTitle("新規ファイル");
                     return false;
                 }
