@@ -18,15 +18,6 @@ public class Dot extends Figure{
 		this.isFill = true;
 	}
 
-	public Dot(boolean isFill) {
-		this.isFill = isFill;
-	}
-
-	public void setFill(boolean isFill) {
-		this.isFill = isFill;
-	}
-
-
 	@Override
 	public void paint(Graphics g) {
 		
@@ -64,7 +55,6 @@ public class Dot extends Figure{
 		box.isFill = this.isFill;
 		box.x = this.x;
 		box.y = this.y;
-		box.color = this.color;
 		box.w = this.w;
 		box.h = this.h;
 		return box;

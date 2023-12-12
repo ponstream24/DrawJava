@@ -64,7 +64,7 @@ public class Box extends Figure {
 			else if( w < 0 && h >= 0 ) {
 				g.drawRect(x + w, y, -w, h);
 			}
-			else if( w >= 0 && h < 0 ) {
+			else if(w >= 0) {
 				g.drawRect(x, y + h, w, -h);
 			}
 			else  {
@@ -81,11 +81,7 @@ public class Box extends Figure {
 //
 //		}
 	}
-	
-	public static double minami(int x, int y) {
-		
-		return x / y;
-	}
+
 
 	@Override
 	public void paintLine(Graphics g, int x, int y) {
@@ -118,7 +114,6 @@ public class Box extends Figure {
 		box.isFill = this.isFill;
 		box.x = this.x;
 		box.y = this.y;
-		box.color = this.color;
 		box.w = this.w;
 		box.h = this.h;
 		return box;

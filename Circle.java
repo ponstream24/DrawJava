@@ -12,27 +12,10 @@ package enshuReport2_2023;
 
 import java.awt.Graphics;
 
-//public class Circle extends Figure {
-//	Circle(){}
-//
-//	@Override public void paint(Graphics g){
-//		int r = (int)Math.sqrt((double)(w * w + h * h));
-//		g.drawOval(x - r, y - r, r * 2 , r * 2);
-//	}
-//}
-
 public class Circle extends Figure {
 
 	public Circle() {
 		this.isFill = true;
-	}
-
-	public Circle(boolean isFill) {
-		this.isFill = isFill;
-	}
-
-	public void setFill(boolean isFill) {
-		this.isFill = isFill;
 	}
 
 	@Override
@@ -61,7 +44,7 @@ public class Circle extends Figure {
 			else if( w < 0 && h >= 0 ) {
 				g.drawOval(x + w, y, -w, h);
 			}
-			else if( w >= 0 && h < 0 ) {
+			else if(w >= 0) {
 				g.drawOval(x, y + h, w, -h);
 			}
 			else  {
@@ -96,7 +79,6 @@ public class Circle extends Figure {
 		circle.isFill = this.isFill;
 		circle.x = this.x;
 		circle.y = this.y;
-		circle.color = this.color;
 		circle.w = this.w;
 		circle.h = this.h;
 		return circle;

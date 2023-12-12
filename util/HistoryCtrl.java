@@ -18,8 +18,8 @@ import java.util.Stack;
 
 public class HistoryCtrl {
 
-    private Stack<ArrayList<LinkedList<Figure>>> undoList = new Stack<>();
-    private Stack<ArrayList<LinkedList<Figure>>> redoList = new Stack<>();
+    private final Stack<ArrayList<LinkedList<Figure>>> undoList = new Stack<>();
+    private final Stack<ArrayList<LinkedList<Figure>>> redoList = new Stack<>();
 
     /**
      * 一つ戻る
@@ -39,6 +39,13 @@ public class HistoryCtrl {
         ArrayList<LinkedList<Figure>> result = this.undoList.pop();
 
         this.redoList.push(result);
+
+        for (ArrayList<LinkedList<Figure>> linkedList : undoList ) {
+            System.out.println(linkedList);
+        }
+
+        System.out.println("↓");
+        System.out.println(result);
 
         return result;
     }
@@ -60,18 +67,25 @@ public class HistoryCtrl {
 
         this.undoList.push(result);
 
+        for (ArrayList<LinkedList<Figure>> linkedList : redoList ) {
+            System.out.println(linkedList);
+        }
+
+        System.out.println("↓");
+        System.out.println(result);
+
         return result;
     }
 
     /**
      * 履歴に追加
-     * @return 必要なし
      */
     public void add(ArrayList<LinkedList<Figure>> history){
 
 //        直前のリスト数と同じ
-        if( this.undoList.size() > 0 && history.size() == this.undoList.size() ){
-            return;
+        if( this.undoList.size() > 1 && history.size() == this.undoList.size() ){
+            System.out.println("同じ : " + history.size());
+//            return;
         }
 
         ArrayList<LinkedList<Figure>> h = new ArrayList<>(history);
@@ -79,24 +93,21 @@ public class HistoryCtrl {
         this.undoList.push(h);
         this.redoList.clear();
 
-        System.out.println("追加 : "+undoList.size());
-        System.out.println(undoList);
+        System.out.println();
+
+        for (ArrayList<LinkedList<Figure>> linkedList : undoList ) {
+            System.out.println(linkedList);
+        }
     }
 
     public Stack<ArrayList<LinkedList<Figure>>> getUndoList() {
-        return this.undoList;
-    }
 
-    public void setUndoList(Stack<ArrayList<LinkedList<Figure>>> undoList) {
-        this.undoList = undoList;
+        System.out.println("参照 : " + this.undoList);
+        return this.undoList;
     }
 
     public Stack<ArrayList<LinkedList<Figure>>> getRedoList() {
         return this.redoList;
-    }
-
-    public void setRedoList(Stack<ArrayList<LinkedList<Figure>>> redoList) {
-        this.redoList = redoList;
     }
 
     public ArrayList<LinkedList<Figure>> getNextUndo(){

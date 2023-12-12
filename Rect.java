@@ -14,10 +14,6 @@ import java.awt.Graphics;
 
 public class Rect extends Figure {
 
-	public Rect() {
-		// TODO 自動生成されたコンストラクター・スタブ
-	}
-
 	//	
 	//	@Override public void paint(Graphics g){
 	//		g.drawRect(x, y, w, h);

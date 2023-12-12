@@ -32,6 +32,7 @@ public class Figure extends Coord{
 		this.w = w;
 		this.h = h;
 	}
+	
 	public void paintCursor(Graphics g) {
 
 		g.setColor(this.color);
