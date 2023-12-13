@@ -68,7 +68,24 @@ Windowを閉じるリクエストが発生した時に、`保存済みか||保�
 
 #### 動作
 ![ensyu5](https://chibakoudai.com/contents/tetsuka/ensyu5.png)
-* Cmd + Wで閉じようとした時、
+* 以下の時に確認が表示された
+  * Cmd + Wで閉じようとした時
+  * Cmd + Qで閉じようとした時
+  * xを押して閉じようとした時
+  * 終了ボタンを押して閉じようとした時
+* 以下の分岐を確認できた
+  * はい
+    * 新規保存
+        * システム終了
+    * 上書き保存
+        * システム終了
+    * キャンセル
+      * 確認ダイアログを閉じる
+  * いいえ
+    * 確認ダイアログを閉じる
+      * システム終了
+  * 取り消し
+    * 確認ダイアログを閉じる
 
 ### HistoryCtrlクラス
 HistoryCtrl.java
@@ -164,6 +181,12 @@ public class HistoryCtrl {
 }
 ```
 StackでUndoとRedoのリストを管理して、随時追加削除を行っている。
+
+#### 動作
+![ensyu13](https://chibakoudai.com/contents/tetsuka/ensyu13.png)
+Undo実行前
+![ensyu14](https://chibakoudai.com/contents/tetsuka/ensyu14.png)
+Undo実行後
 
 ### どの方向にでも描けるようにする
 Box.java, Circle.java
