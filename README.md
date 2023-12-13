@@ -183,10 +183,20 @@ public class HistoryCtrl {
 StackでUndoとRedoのリストを管理して、随時追加削除を行っている。
 
 #### 動作
-![ensyu13](https://chibakoudai.com/contents/tetsuka/ensyu13.png)
 Undo実行前
-![ensyu14](https://chibakoudai.com/contents/tetsuka/ensyu14.png)
+![ensyu13](https://chibakoudai.com/contents/tetsuka/ensyu13.png)
 Undo実行後
+![ensyu14](https://chibakoudai.com/contents/tetsuka/ensyu14.png)
+Redo実行後
+![ensyu13](https://chibakoudai.com/contents/tetsuka/ensyu13.png)
+* 以上の画像の様にUndoで戻り、Redoでやり直しができた。
+* Undo,Redoの実行が不可能の時、各ボタンを無効化しユーザーにわかりやすくした。
+* 以下の時に実行された
+  * Undoボタンを押した時
+  * Redoボタンを押した時
+  * Cmd + Z を押した時
+  * Cmd + Y を押した時
+
 
 ### どの方向にでも描けるようにする
 Box.java, Circle.java
@@ -202,6 +212,14 @@ if (w >= 0 && h >= 0) {
 }
 ```
 4方向に分けて処理する。
+
+#### 動作
+![ensyu15](https://chibakoudai.com/contents/tetsuka/ensyu15.png)
+* 以下の場合に分けて処理を行った
+  * 右上
+  * 右下
+  * 左下
+  * 左上
 
 ### リサイズ
 Paint.java
@@ -305,22 +323,302 @@ public static void setDesign() {
 }
 ```
 
+#### 動作
+起動時
+![ensyu3](https://chibakoudai.com/contents/tetsuka/ensyu3.png)
+Windowをリサイズ
+![ensyu2](https://chibakoudai.com/contents/tetsuka/ensyu2.png)
+* 画面のサイズを変更すると右側のツールバーも移動する
+
+### 全削除
+Paint.java
+```java
+else if (key == 'r' || key == 'R') {
+
+    if (isDrawLock)
+        return;
+    coordsList = new ArrayList<>();
+    coords = new LinkedList<>();
+    historyAdd();
+}
+```
+全削除できるようにショートカットキーを追加した。また、戻せる様に履歴に追加した。
+#### 動作
+実行前
+![ensyu12](https://chibakoudai.com/contents/tetsuka/ensyu12.png)
+実行後
+![ensyu11](https://chibakoudai.com/contents/tetsuka/ensyu11.png)
+* 以下の時に実行された
+    * Cmd + Rで閉じようとした時
+    * Cmd + Shift + Rで閉じようとした時
+
+### 保存と読み込み
+Paint.java
+```java
+
+public boolean save() {
+    boolean result = fileSave();
+    if (result)
+        isSaved = true;
+    return result;
+}
+
+public boolean saveNew() {
+    boolean result = fileSave(1);
+    if (result)
+        isSaved = true;
+    return result;
+}
+
+public void load() {
+    load(null);
+}
+
+public void load(String str) {
+
+    ArrayList<LinkedList<Figure>> _cooArrayList = new ArrayList<>(coordsList);
+    LinkedList<Figure> _coords = new LinkedList<>(coords);
+    coordsList = new ArrayList<>();
+    coords = new LinkedList<>();
+
+    boolean result = fileLoad(str);
+
+    if (result) {
+        offScreenImage = null;
+        repaint();
+    } else {
+        coordsList = _cooArrayList;
+        coords = _coords;
+    }
+
+    offScreenImage = null;
+    repaint();
+}
+```
+FileCtrl.java
+```java
+/**
+ * Yuki Tetsuka
+ * <p>
+ * Project: DrawJava
+ * Description: A simple drawing application in Java.
+ * <p>
+ * Copyright (c) 2023 Yuki Tetsuka. All rights reserved.
+ * See the project repository at: https://github.com/ponstream24/DrawJava
+ */
+
+package enshuReport2_2023.util;
+
+import static enshuReport2_2023.Paint.*;
+import static enshuReport2_2023.util.ShowCtrl.*;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.ArrayList;
+import java.util.LinkedList;
+
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
+
+import enshuReport2_2023.Figure;
+
+public class FileCtrl {
+
+    public static boolean fileSave() {
+
+        if (loadingFile != null) {
+            File file = new File(loadingFile);
+            if (file.exists()) {
+                return fileSave(0);
+            }
+        }
+
+        return fileSave(1);
+    }
+
+    /**
+     * 保存
+     * @param mode 0 上書き,1 新規
+     */
+    public static boolean fileSave(int mode) {
+
+        try {
+
+            String selectedFilePath;
+
+            if (mode == 0) {
+                selectedFilePath = loadingFile;
+            } else {
+                JFileChooser fileChooser = new JFileChooser();
+                fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+
+                if (loadingFile != null) {
+                    fileChooser.setCurrentDirectory(new File(loadingFile));
+                }
+
+                int result = fileChooser.showSaveDialog(mainFrame);
+
+                if (result == JFileChooser.APPROVE_OPTION) {
+
+                    selectedFilePath = fileChooser.getSelectedFile().getAbsolutePath();
+                    mainFrame.setTitle(selectedFilePath);
+                    loadingFile = selectedFilePath;
+                } else return false;
+            }
+
+            if (selectedFilePath == null) return false;
+
+            nowLoading();
+
+            FileOutputStream fos = new FileOutputStream(selectedFilePath);
+            ObjectOutputStream oos = new ObjectOutputStream(fos);
+            oos.writeObject(coordsList);
+            oos.close();
+            fos.close();
+
+            closeNowLoading();
+
+            return true;
+        } catch (IOException ignored) {
+        }
+        return false;
+    }
+
+    public static boolean fileLoad() {
+        return fileLoad(null);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static boolean fileLoad(String path) {
+
+        try {
+            String selectedFilePath;
+
+            if (path == null) {
+
+                Object[] options = {"開く", "新規作成", "キャンセル"};
+
+                // ダイアログを表示
+                int typeResult = JOptionPane.showOptionDialog(
+                        null,
+                        "既存のファイルを読み込みますか？",
+                        "読み込み",
+                        JOptionPane.DEFAULT_OPTION,
+                        JOptionPane.QUESTION_MESSAGE,
+                        null,
+                        options,
+                        options[0]);
+
+//                既存
+                if (typeResult == 0) {
+
+                    JFileChooser fileChooser = new JFileChooser();
+                    fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+
+                    if (loadingFile != null) {
+                        fileChooser.setCurrentDirectory(new File(loadingFile));
+                    }
+
+                    int result = fileChooser.showOpenDialog(mainFrame);
+
+                    if (result == JFileChooser.APPROVE_OPTION) {
+                        selectedFilePath = fileChooser.getSelectedFile().getAbsolutePath();
+                        mainFrame.setTitle(selectedFilePath);
+                        loadingFile = selectedFilePath;
+                    } else {
+                        return false;
+                    }
+                }
+
+//                新規
+                else if (typeResult == 1) {
+                    mainFrame.setTitle("新規ファイル");
+                    return true;
+                }
+//                キャンセル
+                else {
+                    return false;
+                }
+            } else {
+                selectedFilePath = path;
+            }
+
+            nowLoading();
+
+            FileInputStream fis = new FileInputStream(selectedFilePath);
+            ObjectInputStream ois = new ObjectInputStream(fis);
+            coordsList = (ArrayList<LinkedList<Figure>>) ois.readObject();
+            ois.close();
+            fis.close();
+
+            closeNowLoading();
+
+            return true;
+        } catch (IOException | ClassNotFoundException ignored) {
+            JOptionPane.showMessageDialog(mainFrame, "ファイルの読み込みに失敗しました。");
+            closeNowLoading();
+        }
+
+        return false;
+    }
+}
+```
+* ファイルが存在するか確認して存在しない場合は`新規保存`、する場合は`上書き`または`新規保存`を促す。
+* 以下の時に確認が表示された
+  * Cmd + Wで閉じようとした時
+  * Cmd + Qで閉じようとした時
+  * xを押して閉じようとした時
+  * 終了ボタンを押して閉じようとした時
+  * Cmd + Sで保存しようとした時
+  * Cmd + Shift + Sで保存しようとした時(`新規保存`)
+* 以下の分岐を確認できた
+  * ファイルが存在する
+    * 新規保存
+      * システム終了
+    * 上書き保存
+      * システム終了
+    * キャンセル
+      * 確認ダイアログを閉じる
+  * ファイルが存在しない
+    * 新規保存
+      * システム終了
+    * キャンセル
+      * 確認ダイアログを閉じる
+  
 ## 動作確認手法・環境
 以下の実行環境で行った
 * Eclipse上で制御文字が使えるようにASCII制御文字をオンにした。
-* 手順は以下のURLの通り、設定->実行/デバック->コンソール->ASCII制御文字を解釈する->復帰文字(\r)を制御文字として解釈する をオンにする
+* 手順は以下のURLの通り、`設定`->`実行/デバック`->`コンソール`->`ASCII制御文字を解釈する`->`復帰文字(\r)を制御文字として解釈する` をオンにする
 * https://eclipse.dev/eclipse/news/4.14/platform.php#control-character-console
-* 環境
+- ①環境
   * JRE -> JavaSE-17
   * OS  -> Windows 10 Pro
   * プロセッサ -> Intel(R) Core(TM) i5-7500T CPU @ 2.70GHz   2.71 GHz
   * RAM -> 8.00 GB
-* 環境2 
+- ②環境
   * JRE -> JavaSE-17
   * OS  -> macOS Canalia
   * プロセッサ -> 1.6 GHz デュアルコアIntel Core i5
   * RAM -> 8 GB 2133 MHz LPDDR3
 
+## 考察
+### 画面のリサイズ時のチラつき
+* 画面のリサイズを行った際に、右側に設置しているチェックボックスやボタンがちらつくことがある。
+  * `public void componentResized(ComponentEvent e)`が呼び出されるごとにボタンの座標を計算、配置を行っているためラグが発生していると考える。
+  * また端末ごとにチラつき具合が変わるため、PCのスペック問題とも考えられる。
+### チェックボックス・ボタン設置した際にキー入力ができない
+* チェックボックス・ボタンを設置をした際にショートカットキーの処理などのキー入力ができない
+  * フォーカスがチェックボックス・ボタンに向いている可能性があったため、チェックボックス・ボタンに対して`checkbox.addKeyListener(this);`でイベントをりっすんをした　
+
+## まとめ
+`前回のお絵描きソフトよりも進化したお絵描きソフトを作る。`のためにさまざまな機能を追加できた。特にUIにこだわることで、より使えるお絵描きソフトとなった。
+
+## 感想など
+全ての機能を実装するまでに、所々躓くことがあったが、難なく制作に取り組むことができた。
 
 ## 主な機能
 
