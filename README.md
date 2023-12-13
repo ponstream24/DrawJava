@@ -347,9 +347,9 @@ else if (key == 'r' || key == 'R') {
 全削除できるようにショートカットキーを追加した。また、戻せる様に履歴に追加した。
 #### 動作
 実行前
-![ensyu12](https://chibakoudai.com/contents/tetsuka/ensyu12.png)
-実行後
 ![ensyu11](https://chibakoudai.com/contents/tetsuka/ensyu11.png)
+実行後
+![ensyu12](https://chibakoudai.com/contents/tetsuka/ensyu12.png)
 * 以下の時に実行された
     * Cmd + Rで閉じようとした時
     * Cmd + Shift + Rで閉じようとした時
@@ -569,7 +569,15 @@ public class FileCtrl {
     }
 }
 ```
-* ファイルが存在するか確認して存在しない場合は`新規保存`、する場合は`上書き`または`新規保存`を促す。
+ファイルが存在するか確認して存在しない場合は`新規保存`、する場合は`上書き`または`新規保存`を促す。
+#### 動作
+読み込み
+![ensyu7](https://chibakoudai.com/contents/tetsuka/ensyu7.png)
+読み込み(確認)
+![ensyu6](https://chibakoudai.com/contents/tetsuka/ensyu6.png)
+保存
+![ensyu4](https://chibakoudai.com/contents/tetsuka/ensyu4.png)
+実行後
 * 以下の時に確認が表示された
   * Cmd + Wで閉じようとした時
   * Cmd + Qで閉じようとした時
