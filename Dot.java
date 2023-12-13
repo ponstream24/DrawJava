@@ -10,53 +10,70 @@
 
 package enshuReport2_2023;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Graphics;
 
 public class Dot extends Figure {
 
-    public Dot() {
-        this.isFill = true;
+    boolean isEraser = false;
+
+    public Dot(boolean isEraser) {
+
+//		初期値を白。10にする。
+        this.color = Color.BLACK;
+        this.isFill = false;
+        this.isEraser = isEraser;
     }
+    
+	public Dot() {
+		this.isFill = true;
+	}
 
-    @Override
-    public void paint(Graphics g) {
-
-        g.setColor(this.color);
-        if (this.isFill) {
-            g.fillOval(x - w / 2, y - h / 2, w, h);
+	@Override
+	public void paint(Graphics g) {
+		
+        if (isEraser) {
+            g.setColor(Color.WHITE);
         } else {
-            g.drawOval(x - w / 2, y - h / 2, w, h);
+            g.setColor(this.color);
         }
-    }
 
-    @Override
-    public void paintLine(Graphics g, int x, int y) {
+		if (this.isFill) {
+			g.fillOval(x - w / 2, y - h / 2, w, h);
+		} else {
+			g.drawOval(x - w / 2, y - h / 2, w, h);
+		}
+	}
 
-        g.setColor(this.color);
-        if (this.isFill) {
-            g.fillOval(x - w / 2, y - h / 2, w, h);
-        } else {
-            g.drawOval(x - w / 2, y - h / 2, w, h);
-        }
-    }
+	@Override
+	public void paintLine(Graphics g, int x, int y) {
 
-    @Override
-    public void move(int dx, int dy) {
-        x += dx;
-        y += dy;
-    }
+		g.setColor(this.color);
+		if (this.isFill) {
+			g.fillOval(x - w / 2, y - h / 2, w, h);
+		} else {
+			g.drawOval(x - w / 2, y - h / 2, w, h);
+		}
+	}
 
-    @Override
-    public Box clone() {
+	@Override
+	public void move(int dx, int dy) {
+		x += dx;
+		y += dy;
+	}
 
-        Box box = new Box();
+	@Override
+	public Dot clone() {
 
-        box.color = this.color;
-        box.isFill = this.isFill;
-        box.x = this.x;
-        box.y = this.y;
-        box.w = this.w;
-        box.h = this.h;
-        return box;
-    }
+		Dot box = new Dot();
+
+		box.color = this.color;
+        box.isEraser = this.isEraser;
+		box.isFill = this.isFill;
+		box.x = this.x;
+		box.y = this.y;
+		box.w = this.w;
+		box.h = this.h;
+		return box;
+	}
 }

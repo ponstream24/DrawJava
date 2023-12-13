@@ -10,16 +10,22 @@
 
 package enshuReport2_2023.util;
 
-import enshuReport2_2023.Figure;
+import static enshuReport2_2023.Paint.*;
+import static enshuReport2_2023.util.ShowCtrl.*;
 
-import javax.swing.*;
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
-import static enshuReport2_2023.Paint.*;
-import static enshuReport2_2023.util.ShowCtrl.closeNowLoading;
-import static enshuReport2_2023.util.ShowCtrl.nowLoading;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
+
+import enshuReport2_2023.Figure;
 
 public class FileCtrl {
 
@@ -91,7 +97,6 @@ public class FileCtrl {
     public static boolean fileLoad(String path) {
 
         try {
-
             String selectedFilePath;
 
             if (path == null) {
@@ -156,6 +161,7 @@ public class FileCtrl {
             return true;
         } catch (IOException | ClassNotFoundException ignored) {
             JOptionPane.showMessageDialog(mainFrame, "ファイルの読み込みに失敗しました。");
+            closeNowLoading();
         }
 
         return false;

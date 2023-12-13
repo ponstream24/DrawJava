@@ -34,7 +34,7 @@
 * 履歴の配列
   * UndoとRedoをそれぞれ配列に格納しているが、Undoに現在のデータを格納するタイミングや、取り出す際の重複問題に苦戦した。
 
-## プログラム(抜粋)
+## プログラム(抜粋) と 実行結果(抜粋)
 ### 閉じる前に確認
 Paint.java
 ```java
@@ -65,6 +65,10 @@ private boolean showSaveConfirmDialog() {
 }
 ```
 Windowを閉じるリクエストが発生した時に、`保存済みか||保存完了したか`を確認して保存漏れが内容にした。
+
+#### 動作
+![ensyu5](https://chibakoudai.com/contents/tetsuka/ensyu5.png)
+* Cmd + Wで閉じようとした時、
 
 ### HistoryCtrlクラス
 HistoryCtrl.java
@@ -294,8 +298,6 @@ public static void setDesign() {
   * プロセッサ -> 1.6 GHz デュアルコアIntel Core i5
   * RAM -> 8 GB 2133 MHz LPDDR3
 
-## 実行結果
-
 
 ## 主な機能
 
@@ -366,6 +368,7 @@ public static void setDesign() {
     * 描画種類
     * コントール
     * アクション
+      * **Undo,Redoは実行不可の場合、ボタンは無効化される**
   * 動的に配置しているため、急遽ボタンを増やしてもデザインが崩れない。
 * 終了
     * 終了時に保存していなかった場合、保存確認のダイヤログが表示されます。

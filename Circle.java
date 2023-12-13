@@ -10,7 +10,7 @@
 
 package enshuReport2_2023;
 
-import java.awt.*;
+import java.awt.Graphics;
 
 public class Circle extends Figure {
 

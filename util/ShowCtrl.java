@@ -10,10 +10,16 @@
 
 package enshuReport2_2023.util;
 
-import javax.swing.*;
-import java.awt.*;
-
 import static enshuReport2_2023.Paint.*;
+
+import java.awt.Button;
+import java.awt.Checkbox;
+import java.awt.Component;
+import java.awt.Frame;
+
+import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 
 public class ShowCtrl {
 
@@ -61,7 +67,6 @@ public class ShowCtrl {
 
 //		画面のサイズ
         double widthMax = mainFrame.getSize().getWidth();
-        double heightMax = mainFrame.getSize().getHeight();
 
 //		現在の位置
         double _w = widthMax - margin_right;
